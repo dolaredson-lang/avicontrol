@@ -7962,6 +7962,63 @@ setTimeout(function() {
 }, 100);
 
 console.log('%c[AVICONTROL] Modo Trabalhador FORÇADO v17.2 ativado!', 'color:#22c55e; font-weight:bold;');
+// ════════════════════════════════════════════════════════════════════════════
+// AVICONTROL — v18: CORREÇÃO DO BOTÃO "+ NOVO DIA"
+// ════════════════════════════════════════════════════════════════════════════
+
+// 1. Arrumar o HTML antigo e criar a "caixa" correta para o telemóvel
+setTimeout(function() {
+    var pageFicha = document.getElementById('page-ficha');
+    if (pageFicha) {
+        // Esconder aquele formulário antigo (card_form_diario) que estava a dar erro
+        var oldForm = document.getElementById('card_form_diario');
+        if (oldForm) oldForm.style.display = 'none';
+        
+        // Esconder a tabela de histórico antiga para não duplicar
+        var oldTables = pageFicha.querySelectorAll('.card');
+        oldTables.forEach(function(c) {
+            if (c.id !== 'card_form_diario') c.style.display = 'none';
+        });
+
+        // Criar a caixa onde os novos cartões vão aparecer
+        if (!document.getElementById('diario_container')) {
+            var header = pageFicha.querySelector('.section-header');
+            if (header) {
+                header.insertAdjacentHTML('afterend', '<div id="diario_container" style="display:flex; flex-direction:column; gap:16px; margin-top: 15px;"></div>');
+            }
+        }
+        
+        // Esconder o botão antigo de importar JSON para o trabalhador não se confundir
+        var btnImport = pageFicha.querySelector('.btn-ghost[onclick*="importAppCapoeira"]');
+        if (btnImport) btnImport.style.display = 'none';
+    }
+}, 500);
+
+// 2. Garantir que o botão "+ Novo Dia" chama a função certa
+window.novoDiaDiario = function() {
+    if (typeof window.diarioDias === 'undefined') window.diarioDias = safeLoad('avi_diario_dias');
+    
+    // Cria o registo do dia de hoje
+    window.diarioDias.push({ 
+        id: 'DIA' + Date.now(), 
+        data: new Date().toISOString().slice(0,10), 
+        loteId: '', 
+        sincronizado: false,
+        itens: [{ id: 'IT' + Date.now(), nome: '', qtd: '', preco: '' }] 
+    });
+    
+    // Guarda na memória do telemóvel
+    safeSet('avi_diario_dias', JSON.stringify(window.diarioDias)); 
+    
+    // Manda desenhar o cartão no ecrã
+    if (typeof window.renderDiario === 'function') {
+        window.renderDiario();
+    } else {
+        alert('Erro ao carregar. Recarregue a página.');
+    }
+};
+
+console.log('%c[AVICONTROL] Botão Novo Dia corrigido (v18)!', 'color:#22c55e; font-weight:bold;');
 </script>
 </body>
 </html>
