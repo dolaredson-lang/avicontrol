@@ -8019,6 +8019,243 @@ window.novoDiaDiario = function() {
 };
 
 console.log('%c[AVICONTROL] Botão Novo Dia corrigido (v18)!', 'color:#22c55e; font-weight:bold;');
+// ════════════════════════════════════════════════════════════════════════════
+// AVICONTROL — v19: INTEGRAÇÃO DA APP CAPOEIRA (Design Mobile)
+// ════════════════════════════════════════════════════════════════════════════
+
+// 1. Injetar o CSS da App Capoeira (Verde, botões grandes)
+var capoeiraCSS = document.createElement('style');
+capoeiraCSS.innerHTML = `
+  :root { --cap-primary: #0f5132; --cap-primary-light: #d1e7dd; --cap-primary-dark: #0a3622; --cap-secondary: #e0a800; --cap-bg: #f8f9fa; --cap-surface: #ffffff; --cap-text: #212529; --cap-text-muted: #6c757d; --cap-danger: #dc3545; --cap-border: #dee2e6; --cap-radius: 14px; }
+  #app-capoeira-wrapper { display: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--cap-bg); color: var(--cap-text); min-height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; z-index: 9999; overflow-y: auto; padding-bottom: 80px; }
+  #app-capoeira-wrapper header { background-color: var(--cap-primary); color: white; padding: 16px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; }
+  #app-capoeira-wrapper header h1 { margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  #app-capoeira-wrapper .cap-container { max-width: 600px; margin: 0 auto; padding: 16px; }
+  #app-capoeira-wrapper .cap-view { display: none; animation: capFadeIn 0.25s ease-out; }
+  #app-capoeira-wrapper .cap-view.active { display: block; }
+  @keyframes capFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  #app-capoeira-wrapper button { font-family: inherit; font-size: 15px; font-weight: 600; padding: 14px 20px; border: none; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  #app-capoeira-wrapper .btn-primary { background-color: var(--cap-primary); color: white; width: 100%; }
+  #app-capoeira-wrapper .btn-secondary { background-color: var(--cap-secondary); color: var(--cap-primary-dark); width: 100%; }
+  #app-capoeira-wrapper .btn-outline { background-color: transparent; border: 2px solid var(--cap-primary); color: var(--cap-primary); }
+  #app-capoeira-wrapper .btn-danger { background-color: var(--cap-danger); color: white; }
+  #app-capoeira-wrapper .btn-sm { padding: 8px 12px; font-size: 13px; border-radius: 8px; }
+  #app-capoeira-wrapper .cap-card { background: var(--cap-surface); border-radius: var(--cap-radius); padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid var(--cap-border); }
+  #app-capoeira-wrapper .cap-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--cap-border); }
+  #app-capoeira-wrapper .cap-card-title { font-size: 16px; font-weight: 700; color: var(--cap-primary); }
+  #app-capoeira-wrapper .form-group { margin-bottom: 16px; }
+  #app-capoeira-wrapper label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; color: var(--cap-text-muted); text-transform: uppercase; }
+  #app-capoeira-wrapper input, #app-capoeira-wrapper select { width: 100%; padding: 14px; border: 1.5px solid var(--cap-border); border-radius: 10px; font-size: 16px; background-color: #fff; }
+  #app-capoeira-wrapper .cap-input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  #app-capoeira-wrapper .cap-menu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  #app-capoeira-wrapper .cap-menu-btn { background: var(--cap-surface); border: 1px solid var(--cap-border); padding: 20px; border-radius: var(--cap-radius); text-align: left; display: flex; align-items: center; gap: 16px; font-size: 16px; color: var(--cap-text); width: 100%; }
+  #app-capoeira-wrapper .cap-menu-btn .icon { font-size: 24px; background: var(--cap-primary-light); color: var(--cap-primary-dark); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+  #app-capoeira-wrapper .cap-preview-box { background: #fff; border: 1px solid var(--cap-border); padding: 20px; border-radius: var(--cap-radius); font-family: monospace; font-size: 14px; white-space: pre-wrap; margin-bottom: 20px; }
+  #app-capoeira-wrapper .hidden { display: none !important; }
+`;
+
+// 2. Injetar o HTML da App Capoeira
+var capoeiraHTML = `
+<div id="app-capoeira-wrapper">
+  <header>
+    <h1><span>🐔</span> Gestão Capoeira</h1>
+    <button id="capBtnHome" class="btn-sm btn-outline hidden" style="color:white; border-color:white;" onclick="capNavTo('dashboard')">🏠</button>
+    <button class="btn-sm btn-danger" onclick="localStorage.removeItem('avi_sessao_atual'); window.location.reload();">Sair</button>
+  </header>
+  <div class="cap-container">
+    <!-- DASHBOARD -->
+    <div id="cap-view-dashboard" class="cap-view active">
+      <div class="cap-card" style="background: var(--cap-primary-light); border: none;">
+        <h2 style="margin-top:0; color:var(--cap-primary-dark); font-size: 20px;">Olá, <span id="capWorkerName">Trabalhador</span></h2>
+        <p style="color: var(--cap-primary); margin-bottom: 0;">Registe a mortalidade e a entrada de stock.</p>
+      </div>
+      <div class="cap-menu-grid">
+        <button class="cap-menu-btn" onclick="capStartNewReport()">
+          <span class="icon">📝</span>
+          <div><strong style="display:block; font-size: 16px; color: var(--cap-primary-dark);">Novo Registo</strong><span>Mortalidade e Entrada de Stock</span></div>
+        </button>
+        <button class="cap-menu-btn" onclick="capNavTo('history')">
+          <span class="icon">📚</span>
+          <div><strong style="display:block; font-size: 16px; color: var(--cap-primary-dark);">Histórico</strong><span>Consultar registos anteriores</span></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- FORMULÁRIO -->
+    <div id="cap-view-form" class="cap-view">
+      <div style="display:flex; justify-content: space-between; margin-bottom: 16px;">
+        <h2 style="margin:0; color:var(--cap-primary-dark); font-size: 20px;">Registo Diário</h2>
+        <button class="btn-sm btn-outline" onclick="capNavTo('dashboard')">Cancelar</button>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-header"><div class="cap-card-title">📋 Identificação</div></div>
+        <div class="cap-input-row">
+          <div class="form-group"><label>Data</label><input type="date" id="capInDate"></div>
+          <div class="form-group"><label>Lote / Mês</label><input type="text" id="capInLote" placeholder="Ex: Outubro"></div>
+        </div>
+        <div class="cap-input-row">
+          <div class="form-group"><label>Trabalhador</label><input type="text" id="capInWorker" placeholder="Seu nome"></div>
+          <div class="form-group"><label>Capoeira</label><input type="text" id="capInCapoeira" placeholder="Ex: Galpão A"></div>
+        </div>
+      </div>
+      <div class="cap-card" style="border-top: 4px solid var(--cap-danger);">
+        <div class="cap-card-header"><div class="cap-card-title" style="color: var(--cap-danger);">💀 Mortalidade</div></div>
+        <label style="display:flex; align-items:center; gap:10px; margin-bottom: 10px; padding: 12px; background: var(--cap-bg); border-radius: 10px; border: 1px solid var(--cap-border);">
+          <input type="checkbox" id="capChkMorteZero" style="width:20px; height:20px;"> Não houve mortalidade hoje (Registar 0)
+        </label>
+        <div id="cap-morte-fields" class="cap-input-row">
+          <div class="form-group"><label>Nº de frangos mortos</label><input type="number" id="capInMorteQty" min="0" placeholder="0"></div>
+          <div class="form-group"><label>Observação</label><input type="text" id="capInMorteObs" placeholder="Ex: causas"></div>
+        </div>
+      </div>
+      <div class="cap-card" style="border-top: 4px solid var(--cap-secondary);">
+        <div class="cap-card-header"><div class="cap-card-title" style="color: var(--cap-secondary);">📦 Entrada de Stock</div></div>
+        <div class="form-group"><label>🌾 Ração Recebida</label><div class="cap-input-row"><input type="number" id="capInRacaoSacos" placeholder="Nº de Sacos"><input type="number" id="capInRacaoPeso" placeholder="Peso/Saco (kg)" value="50"></div></div>
+        <div class="cap-input-row">
+          <div class="form-group"><label>🪵 Serradura (Sacos)</label><input type="number" id="capInSerrQty" placeholder="0"></div>
+          <div class="form-group"><label>🔥 Carvão (Sacos)</label><input type="number" id="capInCarvQty" placeholder="0"></div>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="form-group"><label>Observações Gerais</label><textarea id="capInObsGeral" rows="2" style="width:100%; padding:14px; border:1.5px solid var(--cap-border); border-radius:10px;"></textarea></div>
+        <button class="btn-primary" onclick="capPreviewReport()">Pré-visualizar Relatório</button>
+      </div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div id="cap-view-preview" class="cap-view">
+      <div style="display:flex; justify-content: space-between; margin-bottom: 16px;">
+        <h2 style="margin:0; color:var(--cap-primary-dark); font-size: 20px;">Relatório</h2>
+        <button class="btn-sm btn-outline" onclick="capNavTo('form')">✏️ Editar</button>
+      </div>
+      <div class="cap-preview-box" id="cap-report-text"></div>
+      <div style="display:flex; gap:8px; margin-top:16px;">
+        <button class="btn-secondary" style="flex:1;" onclick="capShareReport()">📤 WhatsApp</button>
+        <button class="btn-outline" style="flex:1;" onclick="capExportAvicontrolJSON()">📥 AVICONTROL</button>
+      </div>
+      <button class="btn-primary" style="width:100%; margin-top:8px;" onclick="capSaveReportToHistory()">💾 Guardar e Concluir</button>
+    </div>
+  </div>
+</div>
+`;
+
+// 3. Inserir no body
+document.body.insertAdjacentHTML('beforeend', capoeiraHTML);
+document.head.appendChild(capoeiraCSS);
+
+// 4. Lógica da App Capoeira (Isolada para não quebrar o AVICONTROL)
+var capState = { currentReport: null, history: [], defaultWorker: '', defaultCapoeira: '', defaultLote: '' };
+
+window.capNavTo = function(viewId) {
+    document.querySelectorAll('#app-capoeira-wrapper .cap-view').forEach(v => v.classList.remove('active'));
+    var target = document.getElementById('cap-view-' + viewId);
+    if (target) target.classList.add('active');
+    if (viewId === 'dashboard') document.getElementById('capBtnHome').classList.add('hidden');
+    else document.getElementById('capBtnHome').classList.remove('hidden');
+    window.scrollTo(0, 0);
+};
+
+window.capStartNewReport = function() {
+    const today = new Date().toISOString().split('T')[0];
+    capState.currentReport = { id: 'rep_' + Date.now(), date: today, worker: capState.defaultWorker, capoeira: capState.defaultCapoeira, lote: capState.defaultLote, morte: { qty: '', obs: '', isZero: false }, stock: { racaoSacos: '', racaoPeso: '50', serrSacos: '', carvSacos: '' }, obsGeral: '' };
+    document.getElementById('capInDate').value = today;
+    document.getElementById('capInWorker').value = capState.defaultWorker;
+    document.getElementById('capInCapoeira').value = capState.defaultCapoeira;
+    document.getElementById('capInLote').value = capState.defaultLote;
+    document.getElementById('capInMorteQty').value = '';
+    document.getElementById('capInMorteObs').value = '';
+    document.getElementById('capChkMorteZero').checked = false;
+    document.getElementById('capInRacaoSacos').value = '';
+    document.getElementById('capInRacaoPeso').value = '50';
+    document.getElementById('capInSerrQty').value = '';
+    document.getElementById('capInCarvQty').value = '';
+    document.getElementById('capInObsGeral').value = '';
+    capNavTo('form');
+};
+
+window.capPreviewReport = function() {
+    var r = capState.currentReport; if(!r) return;
+    r.date = document.getElementById('capInDate').value;
+    r.worker = document.getElementById('capInWorker').value;
+    r.capoeira = document.getElementById('capInCapoeira').value;
+    r.lote = document.getElementById('capInLote').value;
+    r.morte.isZero = document.getElementById('capChkMorteZero').checked;
+    r.morte.qty = document.getElementById('capInMorteQty').value;
+    r.morte.obs = document.getElementById('capInMorteObs').value;
+    r.stock.racaoSacos = document.getElementById('capInRacaoSacos').value;
+    r.stock.racaoPeso = document.getElementById('capInRacaoPeso').value;
+    r.stock.serrSacos = document.getElementById('capInSerrQty').value;
+    r.stock.carvSacos = document.getElementById('capInCarvQty').value;
+    r.obsGeral = document.getElementById('capInObsGeral').value;
+
+    capState.defaultWorker = r.worker; capState.defaultCapoeira = r.capoeira; capState.defaultLote = r.lote;
+
+    let t = `🐔 *RELATÓRIO DIÁRIO*\n📅 ${r.date} | Lote: ${r.lote}\n👷 ${r.worker} (${r.capoeira})\n\n`;
+    if (r.morte.isZero || r.morte.qty !== '') t += `💀 Mortalidade: ${r.morte.qty || 0}\n`;
+    if (r.stock.racaoSacos > 0) t += `🌾 Ração: ${r.stock.racaoSacos} sacos (${r.stock.racaoPeso}kg)\n`;
+    if (r.stock.serrSacos > 0) t += `🪵 Serradura: ${r.stock.serrSacos} sacos\n`;
+    if (r.stock.carvSacos > 0) t += `🔥 Carvão: ${r.stock.carvSacos} sacos\n`;
+    if (r.obsGeral) t += `\n📝 Obs: ${r.obsGeral}`;
+
+    document.getElementById('cap-report-text').textContent = t;
+    capNavTo('preview');
+};
+
+window.capShareReport = function() {
+    var txt = document.getElementById('cap-report-text').textContent;
+    if (navigator.share) navigator.share({ text: txt }).catch(() => {});
+    else window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
+};
+
+window.capExportAvicontrolJSON = function() {
+    var r = capState.currentReport;
+    var exportData = {
+        origem: "AppCapoeira", data: r.date, trabalhador: r.worker, capoeira: r.capoeira, lote: r.lote,
+        mortalidade: { quantidade: parseInt(r.morte.qty) || 0, zero_confirmado: r.morte.isZero, observacao: r.morte.obs },
+        racao: { sacos_recebidos: parseFloat(r.stock.racaoSacos) || 0, peso_saco: parseFloat(r.stock.racaoPeso) || 50 },
+        serradura: { qty: parseFloat(r.stock.serrSacos) || 0, unidade: 'sacos' },
+        carvao: { qty: parseFloat(r.stock.carvSacos) || 0, unidade: 'sacos' },
+        observacoes_gerais: r.obsGeral
+    };
+    var blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href = url; a.download = `avicontrol_${r.date}.json`; a.click(); URL.revokeObjectURL(url);
+    alert('Ficheiro pronto para enviar ao Patrão!');
+};
+
+window.capSaveReportToHistory = function() {
+    if (!capState.history) capState.history = [];
+    capState.history.push(capState.currentReport);
+    alert('Relatório guardado no histórico do telemóvel.');
+    capNavTo('dashboard');
+};
+
+// 5. Ligar o Login do AVICONTROL à App Capoeira
+var oldAplicarPermissoesV19 = window.aplicarPermissoes;
+window.aplicarPermissoes = function(role, nome) {
+    if (oldAplicarPermissoesV19) oldAplicarPermissoesV19(role, nome);
+    
+    if (role === 'campo') {
+        document.querySelector('.app').style.display = 'none'; // Esconde o AVICONTROL
+        document.getElementById('app-capoeira-wrapper').style.display = 'block'; // Mostra a App Capoeira
+        document.getElementById('capWorkerName').textContent = nome;
+    }
+};
+
+// Verificar se já está logado ao abrir
+setTimeout(function() {
+    var sessaoGuardada = localStorage.getItem('avi_sessao_atual');
+    if(sessaoGuardada) {
+        var s = JSON.parse(sessaoGuardada);
+        if(s.role === 'campo') {
+            document.querySelector('.app').style.display = 'none';
+            document.getElementById('app-capoeira-wrapper').style.display = 'block';
+            document.getElementById('capWorkerName').textContent = s.nome;
+        }
+    }
+}, 100);
+
+console.log('%c[AVICONTROL] Integração App Capoeira v19 ativada!', 'color:#22c55e; font-weight:bold;');
 </script>
 </body>
 </html>
