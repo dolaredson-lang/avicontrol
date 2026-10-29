@@ -8021,22 +8021,34 @@ window.novoDiaDiario = function() {
 console.log('%c[AVICONTROL] Botão Novo Dia corrigido (v18)!', 'color:#22c55e; font-weight:bold;');
 // ════════════════════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════════════════════
-// AVICONTROL — v20: APP CAPOEIRA ISOLADA (Correção de Scroll e Data)
+// ════════════════════════════════════════════════════════════════════════════
+// AVICONTROL — v21: APP CAPOEIRA TOTALMENTE ISOLADA (Correção de Scroll e Data)
 // ════════════════════════════════════════════════════════════════════════════
 
-var styleWorkerV20 = document.createElement('style');
-styleWorkerV20.innerHTML = `
-  body.modo-campo { overflow: hidden !important; background: #f8f9fa !important; }
+// 1. O CSS Mágico que isola o ecrã
+var styleWorkerV21 = document.createElement('style');
+styleWorkerV21.innerHTML = `
+  /* Bloqueia o corpo do AVICONTROL para não prender o scroll */
+  body.modo-campo { 
+    overflow: hidden !important; 
+    height: 100vh !important; 
+    margin: 0; padding: 0;
+  }
+  
+  /* Esconde o AVICONTROL completamente */
   body.modo-campo .app { display: none !important; }
   body.modo-campo #workerTopBar { display: none !important; }
 
+  /* A App Capoeira assume o controlo total do ecrã */
   #app-capoeira-wrapper {
     position: fixed !important;
     top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw !important;
+    height: 100vh !important;
     background-color: #f8f9fa;
-    z-index: 999999 !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
+    z-index: 9999999 !important;
+    overflow-y: auto !important; /* Permite rolar para baixo */
+    -webkit-overflow-scrolling: touch; /* Scroll suave no iPhone/Android */
     display: none;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
@@ -8061,7 +8073,12 @@ styleWorkerV20.innerHTML = `
   
   #app-capoeira-wrapper .form-group { margin-bottom: 16px; }
   #app-capoeira-wrapper label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; color: #6c757d; }
-  #app-capoeira-wrapper input, #app-capoeira-wrapper select, #app-capoeira-wrapper textarea { width: 100%; padding: 14px; border: 1.5px solid #dee2e6; border-radius: 10px; font-size: 16px; background-color: #fff; box-sizing: border-box; }
+  
+  /* Garante que os inputs funcionam bem no telemóvel */
+  #app-capoeira-wrapper input, #app-capoeira-wrapper select, #app-capoeira-wrapper textarea { 
+    width: 100%; padding: 14px; border: 1.5px solid #dee2e6; border-radius: 10px; font-size: 16px; 
+    background-color: #fff; box-sizing: border-box; pointer-events: auto !important; opacity: 1 !important;
+  }
   #app-capoeira-wrapper .cap-input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   #app-capoeira-wrapper .cap-menu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
   #app-capoeira-wrapper .cap-menu-btn { background: #ffffff; border: 1px solid #dee2e6; padding: 20px; border-radius: 14px; text-align: left; display: flex; align-items: center; gap: 16px; font-size: 16px; color: #212529; width: 100%; }
@@ -8069,10 +8086,10 @@ styleWorkerV20.innerHTML = `
   #app-capoeira-wrapper .cap-preview-box { background: #fff; border: 1px solid #dee2e6; padding: 20px; border-radius: 14px; font-family: monospace; font-size: 14px; white-space: pre-wrap; margin-bottom: 20px; }
   #app-capoeira-wrapper .hidden { display: none !important; }
 `;
-document.head.appendChild(styleWorkerV20);
+document.head.appendChild(styleWorkerV21);
 
-// Injetar o HTML
-var capoeiraHTMLv20 = `
+// 2. O HTML da App
+var capoeiraHTMLv21 = `
 <div id="app-capoeira-wrapper">
   <header>
     <h1><span>🐔</span> Gestão Capoeira</h1>
@@ -8148,10 +8165,10 @@ var capoeiraHTMLv20 = `
   </div>
 </div>
 `;
-document.body.insertAdjacentHTML('beforeend', capoeiraHTMLv20);
+document.body.insertAdjacentHTML('beforeend', capoeiraHTMLv21);
 
-// Lógica
-var capStateV20 = { currentReport: null };
+// 3. Lógica da App (Garantir que a data preenche)
+var capStateV21 = { currentReport: null };
 
 window.capNavTo = function(viewId) {
     document.querySelectorAll('#app-capoeira-wrapper .cap-view').forEach(v => v.classList.remove('active'));
@@ -8161,11 +8178,20 @@ window.capNavTo = function(viewId) {
 };
 
 window.capStartNewReport = function() {
-    var today = new Date().toISOString().split('T')[0];
-    capStateV20.currentReport = { date: today };
+    // Pega a data local do telemóvel no formato YYYY-MM-DD
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var day = String(now.getDate()).padStart(2, '0');
+    var today = year + '-' + month + '-' + day;
+
+    capStateV21.currentReport = { date: today };
     
     // Preenche a data e limpa os campos
-    document.getElementById('capInDate').value = today;
+    var dateInput = document.getElementById('capInDate');
+    dateInput.value = today;
+    dateInput.disabled = false; // Garante que está ativo
+    
     document.getElementById('capInMorteQty').value = '';
     document.getElementById('capInRacaoSacos').value = '';
     document.getElementById('capInSerrQty').value = '';
@@ -8175,7 +8201,7 @@ window.capStartNewReport = function() {
 };
 
 window.capPreviewReport = function() {
-    var r = capStateV20.currentReport;
+    var r = capStateV21.currentReport;
     r.date = document.getElementById('capInDate').value;
     r.lote = document.getElementById('capInLote').value;
     r.worker = document.getElementById('capInWorker').value;
@@ -8206,7 +8232,7 @@ window.capShareReport = function() {
 };
 
 window.capExportAvicontrolJSON = function() {
-    var r = capStateV20.currentReport;
+    var r = capStateV21.currentReport;
     var exportData = {
         origem: "AppCapoeira", data: r.date, trabalhador: r.worker, capoeira: r.capoeira, lote: r.lote,
         mortalidade: { quantidade: parseInt(r.morte) || 0 },
@@ -8220,10 +8246,10 @@ window.capExportAvicontrolJSON = function() {
     alert('Ficheiro pronto para enviar ao Patrão!');
 };
 
-// Ativar o Modo
-var oldAplicarPermissoesV20 = window.aplicarPermissoes;
+// 4. Ativar o modo e desligar o AVICONTROL
+var oldAplicarPermissoesV21 = window.aplicarPermissoes;
 window.aplicarPermissoes = function(role, nome) {
-    if (oldAplicarPermissoesV20) oldAplicarPermissoesV20(role, nome);
+    if (oldAplicarPermissoesV21) oldAplicarPermissoesV21(role, nome);
     if (role === 'campo') {
         document.body.classList.add('modo-campo');
         document.getElementById('app-capoeira-wrapper').style.display = 'block';
@@ -8239,6 +8265,7 @@ setTimeout(function() {
             document.getElementById('app-capoeira-wrapper').style.display = 'block';
         }
     }
+}, 100);
 }, 100);
 </script>
 </body>
