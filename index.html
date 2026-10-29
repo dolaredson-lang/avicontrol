@@ -7877,6 +7877,91 @@ window.fazerLogin = function() {
 };
 
 console.log('%c[AVICONTROL] Sistema de Login Mobile v16.1 ativado!', 'color:#22c55e; font-weight:bold;');  
+// ════════════════════════════════════════════════════════════════════════════
+// AVICONTROL — v17.2: MODO TRABALHADOR FORÇADO
+// ════════════════════════════════════════════════════════════════════════════
+
+// Criar estilos para esconder o menu lateral e cabeçalho do PC
+var styleWorker = document.createElement('style');
+styleWorker.innerHTML = `
+  .modo-campo .sidebar { display: none !important; }
+  .modo-campo .header { display: none !important; }
+  .modo-campo .main { width: 100vw !important; }
+  .modo-campo .content { padding: 10px !important; }
+  .modo-campo .page { display: none !important; } /* Esconde todas as páginas */
+  .modo-campo #page-ficha { display: block !important; } /* Mostra só o Diário */
+  
+  /* Barra superior simples */
+  #workerTopBar {
+    display: none;
+    background: var(--surface);
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .modo-campo #workerTopBar { display: flex; }
+  
+  .btn-sair-worker {
+    background: var(--red);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+`;
+document.head.appendChild(styleWorker);
+
+// Adicionar a Barra Superior
+if (!document.getElementById('workerTopBar')) {
+    var mainContent = document.querySelector('.main');
+    if (mainContent) {
+        mainContent.insertAdjacentHTML('afterbegin', `
+          <div id="workerTopBar">
+            <div style="font-weight:bold; font-size:16px; color:var(--accent);">🐔 AVICONTROL - Campo</div>
+            <button class="btn-sair-worker" onclick="localStorage.removeItem('avi_sessao_atual'); window.location.reload();">Sair</button>
+          </div>
+        `);
+    }
+}
+
+// Intercetar o login para forçar o visual correto
+var oldAplicarPermissoesV17 = window.aplicarPermissoes;
+window.aplicarPermissoes = function(role, nome) {
+    if (oldAplicarPermissoesV17) oldAplicarPermissoesV17(role, nome);
+    
+    if (role === 'campo') {
+        // Força o modo campo
+        document.body.classList.add('modo-campo');
+        
+        // Corrige o texto "Administrador" no fundo do menu
+        setTimeout(function() {
+            var footer = document.querySelector('.sidebar-footer div');
+            if(footer) {
+                footer.innerHTML = '<div style="font-size:12px;font-weight:600;">Trabalhador de Campo</div><div style="font-size:10px;color:var(--muted);">Acesso Restrito</div>';
+            }
+            // Remove o botão "Terminar Sessão" antigo
+            var btnLogoutAntigo = document.querySelector('.sidebar-footer button');
+            if(btnLogoutAntigo) btnLogoutAntigo.style.display = 'none';
+        }, 200);
+    }
+};
+
+// Se a página for recarregada e a sessão já existir, aplica o modo campo
+setTimeout(function() {
+    var sessaoGuardada = localStorage.getItem('avi_sessao_atual');
+    if(sessaoGuardada) {
+        var s = JSON.parse(sessaoGuardada);
+        if(s.role === 'campo') {
+            document.body.classList.add('modo-campo');
+        }
+    }
+}, 100);
+
+console.log('%c[AVICONTROL] Modo Trabalhador FORÇADO v17.2 ativado!', 'color:#22c55e; font-weight:bold;');
 </script>
 </body>
 </html>
