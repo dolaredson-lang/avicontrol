@@ -7835,6 +7835,48 @@ window.sincronizarDiario = function(diaId) {
   alert('✅ Relatório Único sincronizado com sucesso!\nTodos os itens e a mortalidade foram lançados no sistema.');
   window.location.reload(); // Recarrega para limpar os campos
 };
+
+// ════════════════════════════════════════════════════════════════════════════
+// AVICONTROL — v16.1: LOGIN À PROVA DE TELEMÓVEL
+// ════════════════════════════════════════════════════════════════════════════
+
+var oldFazerLoginV16 = window.fazerLogin;
+window.fazerLogin = function() {
+    // .toLowerCase() ignora se o telemóvel pôs maiúsculas
+    var userInput = document.getElementById('login_user').value.trim().toLowerCase();
+    var passInput = document.getElementById('login_pass').value.trim();
+    var erro = document.getElementById('login_error');
+
+    var usersList = safeLoad('avi_utilizadores_v2');
+    
+    // Se for um telemóvel novo (sem dados), cria os utilizadores padrão
+    if(usersList.length === 0) {
+        usersList = [
+            { user: 'edson', pass: 'edson123', role: 'admin', nome: 'Edson Simango' },
+            { user: 'campo', pass: 'campo123', role: 'campo', nome: 'Trabalhador' }
+        ];
+        safeSet('avi_utilizadores_v2', JSON.stringify(usersList));
+    }
+
+    // Verifica a conta (tudo em minúsculas para evitar erros)
+    var conta = usersList.find(function(u) { 
+        return u.user.toLowerCase() === userInput && u.pass === passInput; 
+    });
+
+    if (conta) {
+        erro.style.display = 'none';
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.querySelector('.app').style.display = 'flex';
+        safeSet('avi_sessao_atual', JSON.stringify(conta));
+        aplicarPermissoes(conta.role, conta.nome);
+    } else {
+        erro.style.display = 'block';
+        // Diz ao utilizador exatamente o que deve escrever
+        erro.innerHTML = 'Erro. Tente: <b>campo</b> / <b>campo123</b>';
+    }
+};
+
+console.log('%c[AVICONTROL] Sistema de Login Mobile v16.1 ativado!', 'color:#22c55e; font-weight:bold;');  
 </script>
 </body>
 </html>
