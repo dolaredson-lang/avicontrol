@@ -8022,237 +8022,315 @@ console.log('%c[AVICONTROL] Botão Novo Dia corrigido (v18)!', 'color:#22c55e; f
 // ════════════════════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════════════════════
-// AVICONTROL — v21: APP CAPOEIRA TOTALMENTE ISOLADA (Correção de Scroll e Data)
+// ════════════════════════════════════════════════════════════════════════════
+// AVICONTROL — v23: APP CAPOEIRA (Design Escuro Profissional + Todos os Campos)
 // ════════════════════════════════════════════════════════════════════════════
 
-// 1. O CSS Mágico que isola o ecrã
-var styleWorkerV21 = document.createElement('style');
-styleWorkerV21.innerHTML = `
-  /* Bloqueia o corpo do AVICONTROL para não prender o scroll */
-  body.modo-campo { 
-    overflow: hidden !important; 
-    height: 100vh !important; 
-    margin: 0; padding: 0;
-  }
-  
-  /* Esconde o AVICONTROL completamente */
+// 1. CSS Isolado (Usa as cores do AVICONTROL)
+var styleWorkerV23 = document.createElement('style');
+styleWorkerV23.innerHTML = `
+  body.modo-campo { overflow: hidden !important; background: var(--bg) !important; }
   body.modo-campo .app { display: none !important; }
-  body.modo-campo #workerTopBar { display: none !important; }
+  
+  #worker-app {
+    position: fixed !important; top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw !important; height: 100vh !important;
+    background-color: var(--bg) !important; color: var(--text) !important;
+    z-index: 9999999 !important; overflow-y: auto !important; 
+    -webkit-overflow-scrolling: touch; display: none;
+    font-family: 'Inter', sans-serif;
+  }
 
-  /* A App Capoeira assume o controlo total do ecrã */
-  #app-capoeira-wrapper {
-    position: fixed !important;
-    top: 0; left: 0; right: 0; bottom: 0;
-    width: 100vw !important;
-    height: 100vh !important;
-    background-color: #f8f9fa;
-    z-index: 9999999 !important;
-    overflow-y: auto !important; /* Permite rolar para baixo */
-    -webkit-overflow-scrolling: touch; /* Scroll suave no iPhone/Android */
-    display: none;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  #worker-app header { background: var(--surface) !important; padding: 16px; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+  #worker-app header h1 { margin: 0; font-size: 18px; font-weight: 700; color: var(--accent); }
+  
+  #worker-app .container { max-width: 600px; margin: 0 auto; padding: 16px; padding-bottom: 100px; }
+  #worker-app .view { display: none; }
+  #worker-app .view.active { display: block; }
+  
+  #worker-app .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  #worker-app .card-header { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  
+  #worker-app .form-group { margin-bottom: 16px; }
+  #worker-app label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+  
+  /* Inputs com 16px evitam que o telemóvel faça zoom automático */
+  #worker-app input, #worker-app select { 
+    width: 100%; padding: 14px; background: var(--surface2); border: 1px solid var(--border); 
+    border-radius: 8px; color: var(--text); font-size: 16px; outline: none; 
+    -webkit-text-fill-color: var(--text); opacity: 1;
   }
+  #worker-app input:focus { border-color: var(--accent); }
+
+  #worker-app .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  #worker-app .row-3 { display: grid; grid-template-columns: 2fr 1fr 50px; gap: 8px; align-items: end; }
   
-  #app-capoeira-wrapper header { background-color: #0f5132; color: white; padding: 16px; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; }
-  #app-capoeira-wrapper header h1 { margin: 0; font-size: 18px; font-weight: 700; }
-  #app-capoeira-wrapper .cap-container { max-width: 600px; margin: 0 auto; padding: 16px; padding-bottom: 100px; }
-  #app-capoeira-wrapper .cap-view { display: none; animation: capFadeIn 0.25s ease-out; }
-  #app-capoeira-wrapper .cap-view.active { display: block; }
-  @keyframes capFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  #worker-app .btn { padding: 14px; border-radius: 8px; font-weight: 700; font-size: 15px; text-align: center; cursor: pointer; border: none; width: 100%; }
+  #worker-app .btn-primary { background: var(--accent); color: #000; }
+  #worker-app .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  #worker-app .btn-success { background: #25D366; color: #fff; }
   
-  #app-capoeira-wrapper button { font-family: inherit; font-size: 15px; font-weight: 600; padding: 14px 20px; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  #app-capoeira-wrapper .btn-primary { background-color: #0f5132; color: white; width: 100%; }
-  #app-capoeira-wrapper .btn-secondary { background-color: #e0a800; color: #0a3622; width: 100%; }
-  #app-capoeira-wrapper .btn-outline { background-color: transparent; border: 2px solid #0f5132; color: #0f5132; }
-  #app-capoeira-wrapper .btn-danger { background-color: #dc3545; color: white; }
-  #app-capoeira-wrapper .btn-sm { padding: 8px 12px; font-size: 13px; border-radius: 8px; }
+  #worker-app .list-item { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid var(--accent); }
   
-  #app-capoeira-wrapper .cap-card { background: #ffffff; border-radius: 14px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #dee2e6; }
-  #app-capoeira-wrapper .cap-card-header { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #dee2e6; }
-  #app-capoeira-wrapper .cap-card-title { font-size: 16px; font-weight: 700; color: #0f5132; }
-  
-  #app-capoeira-wrapper .form-group { margin-bottom: 16px; }
-  #app-capoeira-wrapper label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; color: #6c757d; }
-  
-  /* Garante que os inputs funcionam bem no telemóvel */
-  #app-capoeira-wrapper input, #app-capoeira-wrapper select, #app-capoeira-wrapper textarea { 
-    width: 100%; padding: 14px; border: 1.5px solid #dee2e6; border-radius: 10px; font-size: 16px; 
-    background-color: #fff; box-sizing: border-box; pointer-events: auto !important; opacity: 1 !important;
-  }
-  #app-capoeira-wrapper .cap-input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  #app-capoeira-wrapper .cap-menu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-  #app-capoeira-wrapper .cap-menu-btn { background: #ffffff; border: 1px solid #dee2e6; padding: 20px; border-radius: 14px; text-align: left; display: flex; align-items: center; gap: 16px; font-size: 16px; color: #212529; width: 100%; }
-  #app-capoeira-wrapper .cap-menu-btn .icon { font-size: 24px; background: #d1e7dd; color: #0a3622; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
-  #app-capoeira-wrapper .cap-preview-box { background: #fff; border: 1px solid #dee2e6; padding: 20px; border-radius: 14px; font-family: monospace; font-size: 14px; white-space: pre-wrap; margin-bottom: 20px; }
-  #app-capoeira-wrapper .hidden { display: none !important; }
+  #worker-app .menu-btn { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; width: 100%; color: var(--text); cursor: pointer; text-align: left; margin-bottom: 12px; }
+  #worker-app .menu-btn .icon { font-size: 24px; background: var(--surface2); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); }
 `;
-document.head.appendChild(styleWorkerV21);
+document.head.appendChild(styleWorkerV23);
 
-// 2. O HTML da App
-var capoeiraHTMLv21 = `
-<div id="app-capoeira-wrapper">
+// 2. HTML Completo
+var workerHTML = `
+<div id="worker-app">
   <header>
-    <h1><span>🐔</span> Gestão Capoeira</h1>
-    <button class="btn-sm btn-danger" onclick="localStorage.removeItem('avi_sessao_atual'); window.location.reload();">Sair</button>
+    <h1>🐔 AVICONTROL</h1>
+    <button class="btn btn-outline" style="width:auto; padding: 8px 12px; font-size:12px;" onclick="localStorage.removeItem('avi_sessao_atual'); window.location.reload();">Sair</button>
   </header>
-  <div class="cap-container">
+  <div class="container">
     
     <!-- DASHBOARD -->
-    <div id="cap-view-dashboard" class="cap-view active">
-      <div class="cap-card" style="background: #d1e7dd; border: none; margin-top: 10px;">
-        <h2 style="margin-top:0; color:#0a3622; font-size: 20px;">Olá, Trabalhador</h2>
-        <p style="color: #0f5132; margin-bottom: 0;">Registe a mortalidade e a entrada de stock.</p>
+    <div id="worker-view-dash" class="view active">
+      <div class="card" style="background: var(--surface2); border-left: 4px solid var(--accent);">
+        <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">Olá, Trabalhador</div>
+        <div style="color: var(--muted); font-size: 13px;">Registe o dia de hoje de forma rápida.</div>
       </div>
-      <div class="cap-menu-grid">
-        <button class="cap-menu-btn" onclick="capStartNewReport()">
-          <span class="icon">📝</span>
-          <div><strong style="display:block; font-size: 16px; color: #0a3622;">Novo Registo</strong><span>Mortalidade e Entrada de Stock</span></div>
-        </button>
-      </div>
+      <button class="menu-btn" onclick="workerStartReport()">
+        <span class="icon">📝</span>
+        <div><strong style="display:block; font-size: 16px; color: var(--accent);">Novo Registo</strong><span style="color: var(--muted); font-size: 13px;">Mortalidade, Stock, Vacinas</span></div>
+      </button>
     </div>
 
     <!-- FORMULÁRIO -->
-    <div id="cap-view-form" class="cap-view">
-      <div style="display:flex; justify-content: space-between; margin-bottom: 16px; margin-top: 10px;">
-        <h2 style="margin:0; color:#0a3622; font-size: 20px;">Registo Diário</h2>
-        <button class="btn-sm btn-outline" onclick="capNavTo('dashboard')">Cancelar</button>
+    <div id="worker-view-form" class="view">
+      <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px;">
+        <h2 style="margin:0; font-size: 20px;">Novo Registo</h2>
+        <button class="btn btn-outline" style="width:auto; padding: 8px 12px; font-size: 13px;" onclick="workerNav('dash')">Voltar</button>
       </div>
       
-      <div class="cap-card">
-        <div class="cap-card-header"><div class="cap-card-title">📋 Identificação</div></div>
-        <div class="cap-input-row">
-          <div class="form-group"><label>Data</label><input type="date" id="capInDate"></div>
-          <div class="form-group"><label>Lote / Mês</label><input type="text" id="capInLote" placeholder="Ex: Outubro"></div>
+      <div class="card">
+        <div class="card-header">📋 Identificação</div>
+        <div class="row">
+          <div class="form-group"><label>Data</label><input type="date" id="wDate"></div>
+          <div class="form-group"><label>Lote / Mês</label><input type="text" id="wLote" placeholder="Ex: Outubro"></div>
         </div>
-        <div class="cap-input-row">
-          <div class="form-group"><label>Trabalhador</label><input type="text" id="capInWorker" placeholder="Seu nome"></div>
-          <div class="form-group"><label>Capoeira</label><input type="text" id="capInCapoeira" placeholder="Ex: Galpão A"></div>
-        </div>
-      </div>
-
-      <div class="cap-card" style="border-top: 4px solid #dc3545;">
-        <div class="cap-card-header"><div class="cap-card-title" style="color: #dc3545;">💀 Mortalidade</div></div>
-        <div class="form-group"><label>Nº de frangos mortos</label><input type="number" id="capInMorteQty" min="0" placeholder="0"></div>
-      </div>
-
-      <div class="cap-card" style="border-top: 4px solid #e0a800;">
-        <div class="cap-card-header"><div class="cap-card-title" style="color: #e0a800;">📦 Entrada de Stock</div></div>
-        <div class="form-group"><label>🌾 Ração Recebida</label><div class="cap-input-row"><input type="number" id="capInRacaoSacos" placeholder="Nº de Sacos"><input type="number" id="capInRacaoPeso" placeholder="Peso/Saco (kg)" value="50"></div></div>
-        <div class="cap-input-row">
-          <div class="form-group"><label>🪵 Serradura (Sacos)</label><input type="number" id="capInSerrQty" placeholder="0"></div>
-          <div class="form-group"><label>🔥 Carvão (Sacos)</label><input type="number" id="capInCarvQty" placeholder="0"></div>
+        <div class="row">
+          <div class="form-group"><label>Trabalhador</label><input type="text" id="wWorker" placeholder="Seu nome"></div>
+          <div class="form-group"><label>Capoeira</label><input type="text" id="wCapoeira" placeholder="Ex: Galpão A"></div>
         </div>
       </div>
 
-      <div class="cap-card">
-        <button class="btn-primary" onclick="capPreviewReport()">Pré-visualizar Relatório</button>
+      <div class="card" style="border-top: 3px solid var(--red);">
+        <div class="card-header" style="color: var(--red);">💀 Mortalidade</div>
+        <div class="form-group"><label>Nº de frangos mortos</label><input type="number" id="wMorteQty" min="0" placeholder="0"></div>
+      </div>
+
+      <div class="card" style="border-top: 3px solid var(--accent);">
+        <div class="card-header" style="color: var(--accent);">📦 Entrada de Stock</div>
+        
+        <div class="form-group"><label>🌾 Ração Recebida</label><div class="row"><input type="number" id="wRacaoSacos" placeholder="Sacos"><input type="number" id="wRacaoPeso" placeholder="Kg/Saco" value="50"></div></div>
+        
+        <div class="row">
+          <div class="form-group"><label>🪵 Serradura</label><input type="number" id="wSerrQty" placeholder="Sacos"></div>
+          <div class="form-group"><label>🔥 Carvão</label><input type="number" id="wCarvQty" placeholder="Sacos"></div>
+        </div>
+
+        <!-- MEDICAMENTOS -->
+        <div style="margin-top: 16px;">
+          <label style="color: var(--text); margin-bottom: 8px;">💊 Medicamentos</label>
+          <div id="wMedsList"></div>
+          <div class="row-3">
+            <input type="text" id="wMedProd" placeholder="Nome do medicamento">
+            <input type="number" id="wMedQty" placeholder="Qtd">
+            <button class="btn btn-outline" style="padding: 14px 0;" onclick="workerAddItem('med')">+</button>
+          </div>
+        </div>
+
+        <!-- VACINAS -->
+        <div style="margin-top: 16px;">
+          <label style="color: var(--text); margin-bottom: 8px;">💉 Vacinas</label>
+          <div id="wVacsList"></div>
+          <div class="row-3">
+            <input type="text" id="wVacProd" placeholder="Nome da vacina">
+            <input type="number" id="wVacQty" placeholder="Qtd">
+            <button class="btn btn-outline" style="padding: 14px 0;" onclick="workerAddItem('vac')">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="form-group"><label>Observações Gerais</label><input type="text" id="wObs" placeholder="Alguma nota importante?"></div>
+        <button class="btn btn-primary" onclick="workerPreview()">Pré-visualizar e Enviar</button>
       </div>
     </div>
 
     <!-- PREVIEW -->
-    <div id="cap-view-preview" class="cap-view">
-      <div style="display:flex; justify-content: space-between; margin-bottom: 16px; margin-top: 10px;">
-        <h2 style="margin:0; color:#0a3622; font-size: 20px;">Relatório</h2>
-        <button class="btn-sm btn-outline" onclick="capNavTo('form')">✏️ Editar</button>
+    <div id="worker-view-preview" class="view">
+      <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px;">
+        <h2 style="margin:0; font-size: 20px;">Relatório Pronto</h2>
+        <button class="btn btn-outline" style="width:auto; padding: 8px 12px; font-size: 13px;" onclick="workerNav('form')">Editar</button>
       </div>
-      <div class="cap-preview-box" id="cap-report-text"></div>
-      <div style="display:flex; gap:8px; margin-top:16px;">
-        <button class="btn-secondary" style="flex:1;" onclick="capShareReport()">📤 WhatsApp</button>
-        <button class="btn-outline" style="flex:1;" onclick="capExportAvicontrolJSON()">📥 AVICONTROL</button>
-      </div>
-      <button class="btn-primary" style="width:100%; margin-top:8px;" onclick="capNavTo('dashboard')">Voltar ao Início</button>
+      <div class="card" style="background: var(--surface2); font-family: monospace; white-space: pre-wrap; font-size: 14px; line-height: 1.6;" id="wReportText"></div>
+      
+      <button class="btn btn-success" style="margin-bottom: 12px;" onclick="workerShare()">📤 Enviar por WhatsApp</button>
+      <button class="btn btn-primary" onclick="workerExportJSON()">📥 Exportar para AVICONTROL</button>
+      <button class="btn btn-outline" style="margin-top: 12px;" onclick="workerNav('dash')">Concluir e Voltar</button>
     </div>
+
   </div>
 </div>
 `;
-document.body.insertAdjacentHTML('beforeend', capoeiraHTMLv21);
+document.body.insertAdjacentHTML('beforeend', workerHTML);
 
-// 3. Lógica da App (Garantir que a data preenche)
-var capStateV21 = { currentReport: null };
+// 3. Lógica de Estado e Navegação
+var wState = { report: { meds: [], vacs: [] } };
 
-window.capNavTo = function(viewId) {
-    document.querySelectorAll('#app-capoeira-wrapper .cap-view').forEach(v => v.classList.remove('active'));
-    var target = document.getElementById('cap-view-' + viewId);
-    if (target) target.classList.add('active');
-    document.getElementById('app-capoeira-wrapper').scrollTop = 0;
+window.workerNav = function(view) {
+    document.querySelectorAll('#worker-app .view').forEach(v => v.classList.remove('active'));
+    document.getElementById('worker-view-' + view).classList.add('active');
+    document.getElementById('worker-app').scrollTop = 0;
 };
 
-window.capStartNewReport = function() {
-    // Pega a data local do telemóvel no formato YYYY-MM-DD
-    var now = new Date();
-    var year = now.getFullYear();
-    var month = String(now.getMonth() + 1).padStart(2, '0');
-    var day = String(now.getDate()).padStart(2, '0');
-    var today = year + '-' + month + '-' + day;
-
-    capStateV21.currentReport = { date: today };
+window.workerStartReport = function() {
+    var today = new Date();
+    var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
     
-    // Preenche a data e limpa os campos
-    var dateInput = document.getElementById('capInDate');
-    dateInput.value = today;
-    dateInput.disabled = false; // Garante que está ativo
+    wState.report = { date: dateStr, meds: [], vacs: [] };
     
-    document.getElementById('capInMorteQty').value = '';
-    document.getElementById('capInRacaoSacos').value = '';
-    document.getElementById('capInSerrQty').value = '';
-    document.getElementById('capInCarvQty').value = '';
+    document.getElementById('wDate').value = dateStr;
+    document.getElementById('wMorteQty').value = '';
+    document.getElementById('wRacaoSacos').value = '';
+    document.getElementById('wSerrQty').value = '';
+    document.getElementById('wCarvQty').value = '';
+    document.getElementById('wMedProd').value = '';
+    document.getElementById('wMedQty').value = '';
+    document.getElementById('wVacProd').value = '';
+    document.getElementById('wVacQty').value = '';
+    document.getElementById('wObs').value = '';
     
-    capNavTo('form');
+    workerRenderLists();
+    workerNav('form');
 };
 
-window.capPreviewReport = function() {
-    var r = capStateV21.currentReport;
-    r.date = document.getElementById('capInDate').value;
-    r.lote = document.getElementById('capInLote').value;
-    r.worker = document.getElementById('capInWorker').value;
-    r.capoeira = document.getElementById('capInCapoeira').value;
-    r.morte = document.getElementById('capInMorteQty').value;
-    r.racaoSacos = document.getElementById('capInRacaoSacos').value;
-    r.racaoPeso = document.getElementById('capInRacaoPeso').value;
-    r.serrSacos = document.getElementById('capInSerrQty').value;
-    r.carvSacos = document.getElementById('capInCarvQty').value;
+window.workerAddItem = function(tipo) {
+    if (tipo === 'med') {
+        var p = document.getElementById('wMedProd').value.trim();
+        var q = document.getElementById('wMedQty').value.trim();
+        if (p && q) {
+            wState.report.meds.push({ prod: p, qty: q, unit: 'un' });
+            document.getElementById('wMedProd').value = '';
+            document.getElementById('wMedQty').value = '';
+        }
+    } else {
+        var p = document.getElementById('wVacProd').value.trim();
+        var q = document.getElementById('wVacQty').value.trim();
+        if (p && q) {
+            wState.report.vacs.push({ prod: p, qty: q, unit: 'doses' });
+            document.getElementById('wVacProd').value = '';
+            document.getElementById('wVacQty').value = '';
+        }
+    }
+    workerRenderLists();
+};
+
+window.workerRemoveItem = function(tipo, idx) {
+    if (tipo === 'med') wState.report.meds.splice(idx, 1);
+    else wState.report.vacs.splice(idx, 1);
+    workerRenderLists();
+};
+
+window.workerRenderLists = function() {
+    document.getElementById('wMedsList').innerHTML = wState.report.meds.map((m, i) => `
+        <div class="list-item">
+            <div><strong style="display:block; font-size:14px;">${m.prod}</strong><span style="font-size:12px; color:var(--muted);">${m.qty} un</span></div>
+            <button class="btn btn-outline" style="width:auto; padding: 6px 10px; color: var(--red);" onclick="workerRemoveItem('med', ${i})">✕</button>
+        </div>
+    `).join('');
+    
+    document.getElementById('wVacsList').innerHTML = wState.report.vacs.map((v, i) => `
+        <div class="list-item">
+            <div><strong style="display:block; font-size:14px;">${v.prod}</strong><span style="font-size:12px; color:var(--muted);">${v.qty} doses</span></div>
+            <button class="btn btn-outline" style="width:auto; padding: 6px 10px; color: var(--red);" onclick="workerRemoveItem('vac', ${i})">✕</button>
+        </div>
+    `).join('');
+};
+
+// 4. Gerar Relatório e Exportar
+window.workerPreview = function() {
+    var r = wState.report;
+    r.date = document.getElementById('wDate').value;
+    r.lote = document.getElementById('wLote').value;
+    r.worker = document.getElementById('wWorker').value;
+    r.capoeira = document.getElementById('wCapoeira').value;
+    r.morte = document.getElementById('wMorteQty').value;
+    r.racaoSacos = document.getElementById('wRacaoSacos').value;
+    r.racaoPeso = document.getElementById('wRacaoPeso').value;
+    r.serrSacos = document.getElementById('wSerrQty').value;
+    r.carvSacos = document.getElementById('wCarvQty').value;
+    r.obs = document.getElementById('wObs').value;
 
     var t = "🐔 *RELATÓRIO DIÁRIO*\n";
     t += "📅 Data: " + r.date + "\n";
     t += "🏷️ Lote: " + (r.lote || "-") + "\n";
-    t += "👷 Trabalhador: " + (r.worker || "-") + "\n\n";
+    t += "👷 Trabalhador: " + (r.worker || "-") + " (" + (r.capoeira || "-") + ")\n\n";
     
-    if (r.morte !== "") t += "💀 Mortalidade: " + r.morte + " frangos\n";
-    if (r.racaoSacos > 0) t += "🌾 Ração: " + r.racaoSacos + " sacos (" + r.racaoPeso + "kg)\n";
-    if (r.serrSacos > 0) t += "🪵 Serradura: " + r.serrSacos + " sacos\n";
-    if (r.carvSacos > 0) t += "🔥 Carvão: " + r.carvSacos + " sacos\n";
+    if (r.morte > 0) t += "💀 Mortalidade: " + r.morte + " frangos\n";
+    
+    var stock = [];
+    if (r.racaoSacos > 0) stock.push("🌾 Ração: " + r.racaoSacos + " sacos (" + r.racaoPeso + "kg)");
+    if (r.serrSacos > 0) stock.push("🪵 Serradura: " + r.serrSacos + " sacos");
+    if (r.carvSacos > 0) stock.push("🔥 Carvão: " + r.carvSacos + " sacos");
+    r.meds.forEach(function(m) { stock.push("💊 " + m.prod + ": " + m.qty + " un"); });
+    r.vacs.forEach(function(v) { stock.push("💉 " + v.prod + ": " + v.qty + " doses"); });
+    
+    if (stock.length > 0) {
+        t += "\n📦 *ENTRADA DE STOCK:*\n" + stock.join('\n') + "\n";
+    }
+    if (r.obs) t += "\n📝 Obs: " + r.obs;
 
-    document.getElementById('cap-report-text').textContent = t;
-    capNavTo('preview');
+    document.getElementById('wReportText').textContent = t;
+    workerNav('preview');
 };
 
-window.capShareReport = function() {
-    var txt = document.getElementById('cap-report-text').textContent;
+window.workerShare = function() {
+    var txt = document.getElementById('wReportText').textContent;
     window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
 };
 
-window.capExportAvicontrolJSON = function() {
-    var r = capStateV21.currentReport;
+window.workerExportJSON = function() {
+    var r = wState.report;
+    
+    // Formato exato que o teu "Importar Relatório" no PC espera
     var exportData = {
-        origem: "AppCapoeira", data: r.date, trabalhador: r.worker, capoeira: r.capoeira, lote: r.lote,
+        origem: "AppCapoeira", 
+        data: r.date, 
+        trabalhador: r.worker, 
+        capoeira: r.capoeira, 
+        lote: r.lote,
         mortalidade: { quantidade: parseInt(r.morte) || 0 },
-        racao: { sacos_recebidos: parseFloat(r.racaoSacos) || 0, peso_saco: parseFloat(r.racaoPeso) || 50 },
+        racao: { consumo_kg: (parseFloat(r.racaoSacos) || 0) * (parseFloat(r.racaoPeso) || 50) }, // O importador espera consumo_kg, então enviamos o total de kg
         serradura: { qty: parseFloat(r.serrSacos) || 0, unidade: 'sacos' },
-        carvao: { qty: parseFloat(r.carvSacos) || 0, unidade: 'sacos' }
+        carvao: { qty: parseFloat(r.carvSacos) || 0, unidade: 'sacos' },
+        medicamentos: r.meds,
+        vacinas: r.vacs,
+        observacoes_gerais: r.obs
     };
+    
     var blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
     var url = URL.createObjectURL(blob);
-    var a = document.createElement('a'); a.href = url; a.download = 'avicontrol_' + r.date + '.json'; a.click(); URL.revokeObjectURL(url);
-    alert('Ficheiro pronto para enviar ao Patrão!');
+    var a = document.createElement('a'); 
+    a.href = url; 
+    a.download = 'avicontrol_' + r.date + '.json'; 
+    a.click(); 
+    URL.revokeObjectURL(url);
+    
+    alert('Ficheiro JSON pronto! Envia para o teu chefe.');
 };
 
-// 4. Ativar o modo e desligar o AVICONTROL
-var oldAplicarPermissoesV21 = window.aplicarPermissoes;
+// 5. Ativar o Modo no Login
+var oldAplicarPermissoesV23 = window.aplicarPermissoes;
 window.aplicarPermissoes = function(role, nome) {
-    if (oldAplicarPermissoesV21) oldAplicarPermissoesV21(role, nome);
+    if (oldAplicarPermissoesV23) oldAplicarPermissoesV23(role, nome);
     if (role === 'campo') {
         document.body.classList.add('modo-campo');
-        document.getElementById('app-capoeira-wrapper').style.display = 'block';
+        document.getElementById('worker-app').style.display = 'block';
     }
 };
 
@@ -8262,10 +8340,12 @@ setTimeout(function() {
         var s = JSON.parse(sessaoGuardada);
         if(s.role === 'campo') {
             document.body.classList.add('modo-campo');
-            document.getElementById('app-capoeira-wrapper').style.display = 'block';
+            document.getElementById('worker-app').style.display = 'block';
         }
     }
 }, 100);
+
+console.log('%c[AVICONTROL] App Trabalhador v23 (Dark Theme) ativada!', 'color:#22c55e; font-weight:bold;');
 </script>
 </body>
 </html>
