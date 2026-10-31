@@ -8472,6 +8472,73 @@ setTimeout(function() {
 }, 1000);
 
 console.log('%c[AVICONTROL] Módulo Supabase (Nuvem) pronto!', 'color:#22c55e; font-weight:bold;');
+  // ════════════════════════════════════════════════════════════════════════════
+// AVICONTROL — v31: SINCRONIZAÇÃO EM TEMPO REAL (5 em 5 Segundos)
+// ════════════════════════════════════════════════════════════════════════════
+
+function haModalAberto() {
+    return document.querySelector('.modal-overlay.open') !== null;
+}
+
+setInterval(async function() {
+    // Só corre se a aba do browser estiver aberta e visível
+    if (document.hidden) return; 
+    
+    // Não corre se a chave não estiver configurada
+    if (SUPABASE_KEY.includes("sb_publishable_XyZ")) return;
+    
+    // Não corre se houver popup aberto
+    if (haModalAberto()) return;
+
+    // Não corre se o utilizador estiver a escrever
+    var activeEl = document.activeElement;
+    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT')) {
+        return; 
+    }
+
+    try {
+        const resposta = await fetch(`${SUPABASE_URL}/rest/v1/avicontrol_data?chave=eq.backup_principal&select=valor`, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+        });
+
+        const dados = await resposta.json();
+        
+        if (dados && dados.length > 0) {
+            const backup = dados[0].valor;
+            const dataNuvem = new Date(backup.dataSync).getTime();
+            const ultimaSyncLocal = localStorage.getItem('avi_ultima_sync') ? new Date(localStorage.getItem('avi_ultima_sync')).getTime() : 0;
+
+            // Se a nuvem for mais recente, atualiza os dados
+            if (dataNuvem > ultimaSyncLocal) {
+                lotes = backup.lotes || [];
+                movs = backup.movs || [];
+                racoes = backup.racoes || [];
+                despesas = backup.despesas || [];
+                vendas = backup.vendas || [];
+                empresa = backup.empresa || {};
+                galpoes = backup.galpoes || [];
+                atividades = backup.atividades || [];
+                planos = backup.planos || [];
+
+                save();
+                saveExtra();
+                safeSet('avi_ultima_sync', backup.dataSync);
+                
+                console.log('%c[AVICONTROL] Tempo real: Dados atualizados!', 'color:#22c55e; font-weight:bold;');
+                
+                // Recarrega a página para mostrar os dados novos
+                if (document.getElementById('page-dashboard').classList.contains('active')) {
+                    window.location.reload();
+                }
+            }
+        }
+    } catch (e) {
+        console.log('A tentar sincronizar...', e.message);
+    }
+}, 5000); // 5000 ms = 5 segundos
 </script>
 </body>
 </html>
