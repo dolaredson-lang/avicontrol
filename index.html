@@ -8472,7 +8472,7 @@ setTimeout(function() {
 }, 1000);
 
 console.log('%c[AVICONTROL] Módulo Supabase (Nuvem) pronto!', 'color:#22c55e; font-weight:bold;');
-  // ════════════════════════════════════════════════════════════════════════════
+ // ════════════════════════════════════════════════════════════════════════════
 // AVICONTROL — v32: APP TRABALHADOR (PARTE 1 - HTML/CSS)
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -8570,7 +8570,7 @@ var workerHTML = `
       </div>
       <div class="card"><div class="form-group"><label>Observações Gerais</label><input type="text" id="wObs" placeholder="ALGUMA NOTA IMPORTANTE?"></div><button class="btn btn-primary" onclick="workerPreview()">Pré-visualizar Relatório</button></div>
     </div>
-        <div id="worker-view-preview" class="view">
+    <div id="worker-view-preview" class="view">
       <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px;"><h2 style="margin:0; font-size: 20px;">Relatório Pronto</h2><button class="btn btn-outline btn-sm" onclick="workerNav('form')">Editar</button></div>
       <div class="card" style="border-left: 4px solid var(--blue); background: var(--surface2);"><div class="form-group" style="margin-bottom: 0;"><label style="color: var(--blue);">Para quem deseja enviar? (Número de telefone)</label><input type="tel" id="wTargetPhone" placeholder="EX: 258840000000" oninput="workerUpdateLinks()"></div></div>
       <div class="card" style="background: var(--surface2); font-family: monospace; white-space: pre-wrap; font-size: 14px; line-height: 1.6;" id="wReportText"></div>
@@ -8595,7 +8595,7 @@ var workerHTML = `
 <div id="logoutModal" class="worker-modal"><div class="worker-modal-content"><h3 style="margin-top:0; color:var(--text);">Sair do Sistema?</h3><p style="color:var(--muted); font-size:13px; margin-bottom:20px;">Não é necessário sair. Pode simplesmente fechar a aplicação. Mas se desejar sair agora, confirme abaixo.</p><button class="btn btn-outline" style="margin-bottom:10px;" onclick="workerCloseLogoutModal()">Ficar</button><button class="btn btn-danger" onclick="localStorage.removeItem('avi_sessao_atual'); window.location.reload();">Sair</button></div></div>
 `;
 document.body.insertAdjacentHTML('beforeend', workerHTML);
-  // ════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // AVICONTROL — v32: APP TRABALHADOR (PARTE 3 - LÓGICA)
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -8764,73 +8764,6 @@ setTimeout(function() {
 }, 100);
 
 console.log('%c[AVICONTROL] App Trabalhador v32 (Final Completa) ativada!', 'color:#22c55e; font-weight:bold;');
-  // ════════════════════════════════════════════════════════════════════════════
-// AVICONTROL — v31: SINCRONIZAÇÃO EM TEMPO REAL (5 em 5 Segundos)
-// ════════════════════════════════════════════════════════════════════════════
-
-function haModalAberto() {
-    return document.querySelector('.modal-overlay.open') !== null;
-}
-
-setInterval(async function() {
-    // Só corre se a aba do browser estiver aberta e visível
-    if (document.hidden) return; 
-    
-    // Não corre se a chave não estiver configurada
-    if (SUPABASE_KEY.includes("sb_publishable_XyZ")) return;
-    
-    // Não corre se houver popup aberto
-    if (haModalAberto()) return;
-
-    // Não corre se o utilizador estiver a escrever
-    var activeEl = document.activeElement;
-    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT')) {
-        return; 
-    }
-
-    try {
-        const resposta = await fetch(`${SUPABASE_URL}/rest/v1/avicontrol_data?chave=eq.backup_principal&select=valor`, {
-            headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': `Bearer ${SUPABASE_KEY}`
-            }
-        });
-
-        const dados = await resposta.json();
-        
-        if (dados && dados.length > 0) {
-            const backup = dados[0].valor;
-            const dataNuvem = new Date(backup.dataSync).getTime();
-            const ultimaSyncLocal = localStorage.getItem('avi_ultima_sync') ? new Date(localStorage.getItem('avi_ultima_sync')).getTime() : 0;
-
-            // Se a nuvem for mais recente, atualiza os dados
-            if (dataNuvem > ultimaSyncLocal) {
-                lotes = backup.lotes || [];
-                movs = backup.movs || [];
-                racoes = backup.racoes || [];
-                despesas = backup.despesas || [];
-                vendas = backup.vendas || [];
-                empresa = backup.empresa || {};
-                galpoes = backup.galpoes || [];
-                atividades = backup.atividades || [];
-                planos = backup.planos || [];
-
-                save();
-                saveExtra();
-                safeSet('avi_ultima_sync', backup.dataSync);
-                
-                console.log('%c[AVICONTROL] Tempo real: Dados atualizados!', 'color:#22c55e; font-weight:bold;');
-                
-                // Recarrega a página para mostrar os dados novos
-                if (document.getElementById('page-dashboard').classList.contains('active')) {
-                    window.location.reload();
-                }
-            }
-        }
-    } catch (e) {
-        console.log('A tentar sincronizar...', e.message);
-    }
-}, 5000); // 5000 ms = 5 segundos
 </script>
 </body>
 </html>
