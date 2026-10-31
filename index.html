@@ -8024,11 +8024,12 @@ console.log('%c[AVICONTROL] Botão Novo Dia corrigido (v18)!', 'color:#22c55e; f
 // ════════════════════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════════════════════
-// AVICONTROL — v24: APP TRABALHADOR (PROFISSIONAL, DIRETO E COMPLETO)
+// ════════════════════════════════════════════════════════════════════════════
+// AVICONTROL — v26: APP TRABALHADOR (WhatsApp + SMS com Número Editável)
 // ════════════════════════════════════════════════════════════════════════════
 
-var styleWorkerV24 = document.createElement('style');
-styleWorkerV24.innerHTML = `
+var styleWorkerV26 = document.createElement('style');
+styleWorkerV26.innerHTML = `
   body.modo-campo { overflow: hidden !important; background: var(--bg) !important; }
   body.modo-campo .app { display: none !important; }
   
@@ -8063,10 +8064,11 @@ styleWorkerV24.innerHTML = `
   #worker-app .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   #worker-app .row-med { display: grid; grid-template-columns: 2fr 1fr 1fr 50px; gap: 8px; align-items: end; }
   
-  #worker-app .btn { padding: 14px; border-radius: 8px; font-weight: 700; font-size: 15px; text-align: center; cursor: pointer; border: none; width: 100%; }
+  #worker-app .btn { padding: 14px; border-radius: 8px; font-weight: 700; font-size: 15px; text-align: center; cursor: pointer; border: none; width: 100%; text-decoration: none; display: inline-block; }
   #worker-app .btn-primary { background: var(--accent); color: #000; }
   #worker-app .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
   #worker-app .btn-success { background: #25D366; color: #fff; }
+  #worker-app .btn-sms { background: var(--blue); color: #fff; }
   #worker-app .btn-danger { background: var(--red); color: #fff; }
   #worker-app .btn-sm { padding: 8px 12px; font-size: 13px; width: auto; }
   
@@ -8076,7 +8078,7 @@ styleWorkerV24.innerHTML = `
   
   .hidden { display: none !important; }
 `;
-document.head.appendChild(styleWorkerV24);
+document.head.appendChild(styleWorkerV26);
 
 var workerHTML = `
 <div id="worker-app">
@@ -8170,7 +8172,6 @@ var workerHTML = `
         </div>
       </div>
 
-      <!-- VENDAS (Desativadas por defeito) -->
       <div class="card" style="border-top: 3px solid var(--purple);">
         <div class="card-header" style="color: var(--purple); display:flex; justify-content:space-between;">
           <span>💰 Vendas de Frangos</span>
@@ -8198,10 +8199,24 @@ var workerHTML = `
         <h2 style="margin:0; font-size: 20px;">Relatório Pronto</h2>
         <button class="btn btn-outline btn-sm" onclick="workerNav('form')">Editar</button>
       </div>
+      
+      <!-- CAMPO PARA O NÚMERO DE TELEFONE -->
+      <div class="card" style="border-left: 4px solid var(--blue); background: var(--surface2);">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="color: var(--blue);">Para quem deseja enviar? (Número de telefone)</label>
+          <input type="tel" id="wTargetPhone" placeholder="Ex: 258840000000" oninput="workerUpdateLinks()">
+        </div>
+        <div style="font-size: 11px; color: var(--muted); margin-top: 6px;">O telemóvel vai lembrar-se deste número para a próxima vez. Pode alterá-lo sempre que quiser.</div>
+      </div>
+
       <div class="card" style="background: var(--surface2); font-family: monospace; white-space: pre-wrap; font-size: 14px; line-height: 1.6;" id="wReportText"></div>
       
-      <button class="btn btn-success" style="margin-bottom: 12px;" onclick="workerShare()">📤 Enviar por WhatsApp</button>
-      <button class="btn btn-primary" onclick="workerExportJSON()">📥 Exportar para AVICONTROL</button>
+      <div style="display:flex; gap:8px; margin-bottom: 12px;">
+        <a id="wBtnWhatsApp" href="#" target="_blank" class="btn btn-success" style="flex:1;">📤 WhatsApp</a>
+        <a id="wBtnSMS" href="#" class="btn btn-sms" style="flex:1;">📱 Enviar SMS</a>
+      </div>
+      
+      <button class="btn btn-primary" onclick="workerExportJSON()">📥 Exportar Ficheiro (AVICONTROL)</button>
       <button class="btn btn-outline" style="margin-top: 12px;" onclick="workerNav('dash')">Concluir e Voltar</button>
     </div>
 
@@ -8245,13 +8260,8 @@ window.workerToggleMorte = function() {
     var isZero = document.getElementById('wMorteZero').checked;
     var group = document.getElementById('wMorteGroup');
     var qty = document.getElementById('wMorteQty');
-    if (isZero) {
-        group.classList.add('hidden');
-        qty.value = '0';
-    } else {
-        group.classList.remove('hidden');
-        qty.value = '';
-    }
+    if (isZero) { group.classList.add('hidden'); qty.value = '0'; } 
+    else { group.classList.remove('hidden'); qty.value = ''; }
 };
 
 window.workerToggleVendas = function() {
@@ -8289,7 +8299,7 @@ window.workerStartReport = function() {
 window.workerEditReport = function(index) {
     var r = workerHistory[index];
     if (!r) return;
-    wState.report = JSON.parse(JSON.stringify(r)); // Clone
+    wState.report = JSON.parse(JSON.stringify(r));
     wState.editIndex = index;
 
     document.getElementById('workerFormTitle').textContent = 'A Editar Registo';
@@ -8315,7 +8325,6 @@ window.workerEditReport = function(index) {
         document.getElementById('wAtivarVendas').checked = false;
     }
     workerToggleVendas();
-
     workerRenderLists();
     workerNav('form');
 };
@@ -8365,6 +8374,25 @@ window.workerRenderLists = function() {
     `).join('');
 };
 
+// Nova função para atualizar os links em tempo real quando o número é alterado
+window.workerUpdateLinks = function() {
+    var phoneInput = document.getElementById('wTargetPhone').value;
+    var phone = phoneInput.replace(/\D/g, ''); // Remove espaços e símbolos, deixa só números
+    var text = document.getElementById('wReportText').textContent;
+    var encodedText = encodeURIComponent(text);
+    
+    var waLink = phone ? "https://wa.me/" + phone + "?text=" + encodedText : "https://wa.me/?text=" + encodedText;
+    var smsLink = phone ? "sms:" + phone + "?body=" + encodedText : "sms:?body=" + encodedText;
+    
+    document.getElementById('wBtnWhatsApp').href = waLink;
+    document.getElementById('wBtnSMS').href = smsLink;
+    
+    // Guardar o número na memória do telemóvel
+    if (phone) {
+        safeSet('avi_worker_contact', JSON.stringify({ numero: phone }));
+    }
+};
+
 window.workerPreview = function() {
     var r = wState.report;
     r.date = document.getElementById('wDate').value;
@@ -8379,15 +8407,9 @@ window.workerPreview = function() {
     r.obs = document.getElementById('wObs').value;
 
     if (document.getElementById('wAtivarVendas').checked) {
-        r.vendas = {
-            cliente: document.getElementById('wVendaCliente').value,
-            qtd: document.getElementById('wVendaQty').value
-        };
-    } else {
-        r.vendas = null;
-    }
+        r.vendas = { cliente: document.getElementById('wVendaCliente').value, qtd: document.getElementById('wVendaQty').value };
+    } else { r.vendas = null; }
 
-    // Texto limpo SEM emojis para não dar '?' no WhatsApp
     var t = "*RELATÓRIO DIÁRIO*\n";
     t += "Data: " + r.date + "\n";
     t += "Lote: " + (r.lote || "-") + "\n";
@@ -8403,25 +8425,25 @@ window.workerPreview = function() {
     r.meds.forEach(function(m) { stock.push("- " + m.prod + ": " + m.qty + " " + m.unit); });
     r.vacs.forEach(function(v) { stock.push("- " + v.prod + ": " + v.qty + " " + v.unit); });
     
-    if (stock.length > 0) {
-        t += "\n*ENTRADA DE STOCK:*\n" + stock.join('\n') + "\n";
-    }
+    if (stock.length > 0) t += "\n*ENTRADA DE STOCK:*\n" + stock.join('\n') + "\n";
 
     if (r.vendas) {
         t += "\n*VENDAS:*\n";
         t += "- Cliente: " + (r.vendas.cliente || "Geral") + "\n";
         t += "- Quantidade: " + r.vendas.qtd + " frangos\n";
     }
-
     if (r.obs) t += "\nObs: " + r.obs;
 
     document.getElementById('wReportText').textContent = t;
-    workerNav('preview');
-};
 
-window.workerShare = function() {
-    var txt = document.getElementById('wReportText').textContent;
-    window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+    // Carregar o último número usado (se existir)
+    var contactObj = safeLoadObj('avi_worker_contact', { numero: '' });
+    document.getElementById('wTargetPhone').value = contactObj.numero || '';
+    
+    // Atualizar os links com o número
+    workerUpdateLinks();
+
+    workerNav('preview');
 };
 
 window.workerSaveReport = function() {
@@ -8442,19 +8464,13 @@ window.workerExportJSON = function() {
     if (!workerSaveReport()) return;
     
     var r = wState.report;
-    // Formato exato que o teu "Importar Relatório" no PC espera
     var exportData = {
-        origem: "AppCapoeira", 
-        data: r.date, 
-        trabalhador: r.worker, 
-        capoeira: r.capoeira, 
-        lote: r.lote,
+        origem: "AppCapoeira", data: r.date, trabalhador: r.worker, capoeira: r.capoeira, lote: r.lote,
         mortalidade: { quantidade: parseInt(r.morte) || 0 },
         racao: { consumo_kg: (parseFloat(r.racaoSacos) || 0) * (parseFloat(r.racaoPeso) || 50) },
         serradura: { qty: parseFloat(r.serrSacos) || 0, unidade: 'sacos' },
         carvao: { qty: parseFloat(r.carvSacos) || 0, unidade: 'sacos' },
-        medicamentos: r.meds,
-        vacinas: r.vacs,
+        medicamentos: r.meds, vacinas: r.vacs,
         vendas: r.vendas ? { cliente: r.vendas.cliente, qtd: parseInt(r.vendas.qtd) } : null,
         observacoes_gerais: r.obs
     };
@@ -8467,7 +8483,7 @@ window.workerExportJSON = function() {
     a.click(); 
     URL.revokeObjectURL(url);
     
-    workerNav('dash');
+    alert('Ficheiro JSON guardado! Pode agora enviar a mensagem por WhatsApp ou SMS.');
 };
 
 window.workerShowHistory = function() {
@@ -8507,10 +8523,9 @@ window.workerBackupData = function() {
     var a = document.createElement('a'); a.href = url; a.download = 'backup_historico.json'; a.click(); URL.revokeObjectURL(url);
 };
 
-// 5. Ativar o Modo e Nome
-var oldAplicarPermissoesV24 = window.aplicarPermissoes;
+var oldAplicarPermissoesV26 = window.aplicarPermissoes;
 window.aplicarPermissoes = function(role, nome) {
-    if (oldAplicarPermissoesV24) oldAplicarPermissoesV24(role, nome);
+    if (oldAplicarPermissoesV26) oldAplicarPermissoesV26(role, nome);
     if (role === 'campo') {
         document.body.classList.add('modo-campo');
         document.getElementById('worker-app').style.display = 'block';
@@ -8530,7 +8545,7 @@ setTimeout(function() {
     }
 }, 100);
 
-console.log('%c[AVICONTROL] App Trabalhador v24 (Pro) ativada!', 'color:#22c55e; font-weight:bold;');
+console.log('%c[AVICONTROL] App Trabalhador v26 (Número Editável) ativada!', 'color:#22c55e; font-weight:bold;');
 </script>
 </body>
 </html>
