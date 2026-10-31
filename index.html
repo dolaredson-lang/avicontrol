@@ -8546,6 +8546,111 @@ setTimeout(function() {
 }, 100);
 
 console.log('%c[AVICONTROL] App Trabalhador v26 (Número Editável) ativada!', 'color:#22c55e; font-weight:bold;');
+// ════════════════════════════════════════════════════════════════════════════
+// AVICONTROL — v27: SINCRONIZAÇÃO SUPABASE (NUVEM)
+// ════════════════════════════════════════════════════════════════════════════
+
+// 1. CONFIGURAÇÃO DO SUPABASE
+const SUPABASE_URL = "https://kqdzjdyziirhqykvvbaf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_XyZ..."; // <--- COLOCA A TUA CHAVE COMPLETA AQUI
+
+// 2. Enviar dados do PC/Telemóvel para a Nuvem
+window.syncParaNuvem = async function() {
+    if (SUPABASE_KEY.includes("sb_publishable_XyZ")) {
+        alert("⚠️ Atenção: Ainda não configuraste a chave do Supabase no código!");
+        return;
+    }
+    try {
+        const dadosParaEnviar = {
+            lotes: lotes, movs: movs, racoes: racoes, despesas: despesas, vendas: vendas,
+            empresa: empresa, galpoes: galpoes, atividades: atividades, planos: planos,
+            dataSync: new Date().toISOString()
+        };
+
+        const resposta = await fetch(`${SUPABASE_URL}/rest/v1/avicontrol_data`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify({
+                chave: 'backup_principal',
+                valor: dadosParaEnviar
+            })
+        });
+
+        if (resposta.ok) {
+            alert('✅ Dados enviados para a Nuvem com sucesso!');
+        } else {
+            const erro = await resposta.text();
+            alert('❌ Erro ao enviar. Detalhes: ' + erro);
+        }
+    } catch (erro) {
+        alert('❌ Erro de rede: ' + erro.message);
+    }
+};
+
+// 3. Puxar dados da Nuvem para o PC/Telemóvel
+window.syncDaNuvem = async function() {
+    if (SUPABASE_KEY.includes("sb_publishable_Pw1ySxbrTJCg_2QdJX37fg_gRloDZlEv")) {
+        alert("⚠️ Atenção: Ainda não configuraste a chave do Supabase no código!");
+        return;
+    }
+    if (!confirm('Atenção: Isto vai substituir os dados atuais deste aparelho pelos dados da Nuvem. Continuar?')) return;
+    
+    try {
+        const resposta = await fetch(`${SUPABASE_URL}/rest/v1/avicontrol_data?chave=eq.backup_principal&select=valor`, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+        });
+
+        const dados = await resposta.json();
+        
+        if (dados && dados.length > 0) {
+            const backup = dados[0].valor;
+            lotes = backup.lotes || [];
+            movs = backup.movs || [];
+            racoes = backup.racoes || [];
+            despesas = backup.despesas || [];
+            vendas = backup.vendas || [];
+            empresa = backup.empresa || {};
+            galpoes = backup.galpoes || [];
+            atividades = backup.atividades || [];
+            planos = backup.planos || [];
+            
+            save();
+            saveExtra();
+            alert('✅ Dados carregados da Nuvem! A aplicação vai reiniciar.');
+            window.location.reload();
+        } else {
+            alert('ℹ️ Não há dados na nuvem ainda. Envia primeiro a partir do PC.');
+        }
+    } catch (erro) {
+        alert('❌ Erro ao puxar dados: ' + erro.message);
+    }
+};
+
+// 4. Adicionar botões na página "Saúde do Sistema"
+setTimeout(function() {
+    const pageSaude = document.getElementById('page-saude');
+    if (pageSaude && !document.getElementById('btnSyncNuvem')) {
+        const header = pageSaude.querySelector('.section-header');
+        if (header) {
+            header.insertAdjacentHTML('afterbegin', `
+                <div style="display:flex; gap:8px; width:100%; margin-bottom:10px;">
+                    <button id="btnSyncNuvem" class="btn btn-primary" onclick="syncParaNuvem()" style="background:var(--blue); color:#fff; flex:1;">☁️ Enviar para Nuvem</button>
+                    <button class="btn btn-ghost" onclick="syncDaNuvem()" style="border-color:var(--blue); color:var(--blue); flex:1;">☁️ Puxar da Nuvem</button>
+                </div>
+            `);
+        }
+    }
+}, 1000);
+
+console.log('%c[AVICONTROL] Módulo Supabase (Nuvem) pronto!', 'color:#22c55e; font-weight:bold;');
 </script>
 </body>
 </html>
