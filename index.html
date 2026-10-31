@@ -8567,7 +8567,7 @@ window.syncParaNuvem = async function() {
             dataSync: new Date().toISOString()
         };
 
-        const resposta = await fetch(`${SUPABASE_URL}/rest/v1/avicontrol_data`, {
+        const resposta = await fetch(`${SUPABASE_URL}/rest/v1/avicontrol_data?on_conflict=chave`, {
             method: 'POST',
             headers: {
                 'apikey': SUPABASE_KEY,
