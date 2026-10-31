@@ -8025,45 +8025,28 @@ console.log('%c[AVICONTROL] Botão Novo Dia corrigido (v18)!', 'color:#22c55e; f
 // ════════════════════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════════════════════
-// AVICONTROL — v26: APP TRABALHADOR (WhatsApp + SMS com Número Editável)
 // ════════════════════════════════════════════════════════════════════════════
-
-var styleWorkerV26 = document.createElement('style');
-styleWorkerV26.innerHTML = `
+// AVICONTROL — v28: APP TRABALHADOR (FINAL)
+// ════════════════════════════════════════════════════════════════════════════
+var styleWorkerV28 = document.createElement('style');
+styleWorkerV28.innerHTML = `
   body.modo-campo { overflow: hidden !important; background: var(--bg) !important; }
   body.modo-campo .app { display: none !important; }
-  
-  #worker-app {
-    position: fixed !important; top: 0; left: 0; right: 0; bottom: 0;
-    width: 100vw !important; height: 100vh !important;
-    background-color: var(--bg) !important; color: var(--text) !important;
-    z-index: 9999999 !important; overflow-y: auto !important; 
-    -webkit-overflow-scrolling: touch; display: none;
-    font-family: 'Inter', sans-serif;
-  }
+  #worker-app { position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; width: 100vw !important; height: 100vh !important; background-color: var(--bg) !important; color: var(--text) !important; z-index: 9999999 !important; overflow-y: auto !important; display: none; font-family: 'Inter', sans-serif; }
   #worker-app header { background: var(--surface) !important; padding: 16px; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
   #worker-app header h1 { margin: 0; font-size: 18px; font-weight: 700; color: var(--accent); }
-  
   #worker-app .container { max-width: 600px; margin: 0 auto; padding: 16px; padding-bottom: 100px; }
   #worker-app .view { display: none; }
   #worker-app .view.active { display: block; }
-  
   #worker-app .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
   #worker-app .card-header { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
-  
   #worker-app .form-group { margin-bottom: 16px; }
   #worker-app label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
-  
-  #worker-app input, #worker-app select { 
-    width: 100%; padding: 14px; background: var(--surface2); border: 1px solid var(--border); 
-    border-radius: 8px; color: var(--text); font-size: 16px; outline: none; 
-    -webkit-text-fill-color: var(--text); opacity: 1;
-  }
+  #worker-app input, #worker-app select { width: 100%; padding: 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 16px; outline: none; font-weight: 600; }
   #worker-app input:focus, #worker-app select:focus { border-color: var(--accent); }
-  
+  #worker-app input::placeholder { font-weight: 700; opacity: 0.7; color: var(--muted); }
   #worker-app .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  #worker-app .row-med { display: grid; grid-template-columns: 2fr 1fr 1fr 50px; gap: 8px; align-items: end; }
-  
+  #worker-app .row-med { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; align-items: center; }
   #worker-app .btn { padding: 14px; border-radius: 8px; font-weight: 700; font-size: 15px; text-align: center; cursor: pointer; border: none; width: 100%; text-decoration: none; display: inline-block; }
   #worker-app .btn-primary { background: var(--accent); color: #000; }
   #worker-app .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
@@ -8071,14 +8054,15 @@ styleWorkerV26.innerHTML = `
   #worker-app .btn-sms { background: var(--blue); color: #fff; }
   #worker-app .btn-danger { background: var(--red); color: #fff; }
   #worker-app .btn-sm { padding: 8px 12px; font-size: 13px; width: auto; }
-  
   #worker-app .list-item { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid var(--accent); }
   #worker-app .menu-btn { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; width: 100%; color: var(--text); cursor: pointer; text-align: left; margin-bottom: 12px; }
   #worker-app .menu-btn .icon { font-size: 24px; background: var(--surface2); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); }
-  
+  .worker-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 10000000; padding: 20px; }
+  .worker-modal.active { display: flex; }
+  .worker-modal-content { background: var(--surface); padding: 24px; border-radius: 16px; width: 100%; max-width: 400px; border: 1px solid var(--accent); text-align: center; }
   .hidden { display: none !important; }
 `;
-document.head.appendChild(styleWorkerV26);
+document.head.appendChild(styleWorkerV28);
 
 var workerHTML = `
 <div id="worker-app">
@@ -8087,37 +8071,21 @@ var workerHTML = `
     <button class="btn btn-outline btn-sm" onclick="localStorage.removeItem('avi_sessao_atual'); window.location.reload();">Sair</button>
   </header>
   <div class="container">
-    
-    <!-- DASHBOARD -->
     <div id="worker-view-dash" class="view active">
       <div class="card" style="background: var(--surface2); border-left: 4px solid var(--accent);">
         <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;" id="workerWelcomeName">Olá</div>
         <div style="color: var(--muted); font-size: 13px;">O que deseja fazer hoje?</div>
       </div>
-      
-      <button class="menu-btn" onclick="workerStartReport()">
-        <span class="icon">📝</span>
-        <div><strong style="display:block; font-size: 16px; color: var(--accent);">Novo Registo</strong><span style="color: var(--muted); font-size: 13px;">Inserir dados do dia</span></div>
-      </button>
-      
-      <button class="menu-btn" onclick="workerShowHistory()">
-        <span class="icon">📚</span>
-        <div><strong style="display:block; font-size: 16px; color: var(--accent);">Histórico</strong><span style="color: var(--muted); font-size: 13px;">Ver ou editar registos anteriores</span></div>
-      </button>
-
-      <button class="menu-btn" onclick="workerNav('settings')">
-        <span class="icon">⚙️</span>
-        <div><strong style="display:block; font-size: 16px; color: var(--accent);">Definições</strong><span style="color: var(--muted); font-size: 13px;">Backups e gestão de dados</span></div>
-      </button>
+      <button class="menu-btn" onclick="workerStartReport()"><span class="icon">📝</span><div><strong style="display:block; font-size: 16px; color: var(--accent);">Novo Registo</strong><span style="color: var(--muted); font-size: 13px;">Inserir dados do dia</span></div></button>
+      <button class="menu-btn" onclick="workerShowHistory()"><span class="icon">📚</span><div><strong style="display:block; font-size: 16px; color: var(--accent);">Histórico</strong><span style="color: var(--muted); font-size: 13px;">Ver ou editar registos</span></div></button>
+      <button class="menu-btn" onclick="workerNav('settings')"><span class="icon">⚙️</span><div><strong style="display:block; font-size: 16px; color: var(--accent);">Definições</strong><span style="color: var(--muted); font-size: 13px;">Preços e backups</span></div></button>
     </div>
 
-    <!-- FORMULÁRIO -->
     <div id="worker-view-form" class="view">
       <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px;">
         <h2 style="margin:0; font-size: 20px;" id="workerFormTitle">Novo Registo</h2>
         <button class="btn btn-outline btn-sm" onclick="workerNav('dash')">Cancelar</button>
       </div>
-      
       <div class="card">
         <div class="card-header">📋 Identificação</div>
         <div class="row">
@@ -8129,7 +8097,6 @@ var workerHTML = `
           <div class="form-group"><label>Capoeira</label><input type="text" id="wCapoeira" placeholder="Ex: Galpão A"></div>
         </div>
       </div>
-
       <div class="card" style="border-top: 3px solid var(--red);">
         <div class="card-header" style="color: var(--red);">💀 Mortalidade</div>
         <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-bottom: 10px;">
@@ -8138,89 +8105,73 @@ var workerHTML = `
         </div>
         <div class="form-group" id="wMorteGroup"><label>Nº de frangos mortos</label><input type="number" id="wMorteQty" min="0" placeholder="0"></div>
       </div>
-
       <div class="card" style="border-top: 3px solid var(--accent);">
         <div class="card-header" style="color: var(--accent);">📦 Entrada de Stock</div>
-        
-        <div class="form-group"><label>🌾 Ração Recebida</label><div class="row"><input type="number" id="wRacaoSacos" placeholder="Sacos"><input type="number" id="wRacaoPeso" placeholder="Kg/Saco" value="50"></div></div>
-        
+        <div class="form-group"><label>🌾 Ração Recebida (Sacos)</label><input type="number" id="wRacaoSacos" placeholder="Nº DE SACOS" min="0"></div>
         <div class="row">
-          <div class="form-group"><label>🪵 Serradura</label><input type="number" id="wSerrQty" placeholder="Sacos"></div>
-          <div class="form-group"><label>🔥 Carvão</label><input type="number" id="wCarvQty" placeholder="Sacos"></div>
+          <div class="form-group"><label>🪵 Serradura (Sacos)</label><input type="number" id="wSerrQty" placeholder="SACOS"></div>
+          <div class="form-group"><label>🔥 Carvão (Sacos)</label><input type="number" id="wCarvQty" placeholder="SACOS"></div>
         </div>
-
         <div style="margin-top: 16px;">
           <label style="color: var(--text); margin-bottom: 8px;">💊 Medicamentos</label>
           <div id="wMedsList"></div>
           <div class="row-med">
-            <input type="text" id="wMedProd" placeholder="Nome">
-            <input type="number" id="wMedQty" placeholder="Qtd">
+            <input type="text" id="wMedProd" placeholder="NOME DO MEDICAMENTO">
+            <input type="number" id="wMedQty" placeholder="QTD" onkeydown="if(event.key === 'Enter') workerAddItem('med')">
             <select id="wMedUnit"><option value="un">un</option><option value="pacote">pacote</option><option value="L">L</option><option value="kg">kg</option></select>
-            <button class="btn btn-outline" style="padding: 14px 0;" onclick="workerAddItem('med')">+</button>
           </div>
         </div>
-
         <div style="margin-top: 16px;">
           <label style="color: var(--text); margin-bottom: 8px;">💉 Vacinas</label>
           <div id="wVacsList"></div>
           <div class="row-med">
-            <input type="text" id="wVacProd" placeholder="Nome">
-            <input type="number" id="wVacQty" placeholder="Qtd">
+            <input type="text" id="wVacProd" placeholder="NOME DA VACINA">
+            <input type="number" id="wVacQty" placeholder="QTD" onkeydown="if(event.key === 'Enter') workerAddItem('vac')">
             <select id="wVacUnit"><option value="doses">doses</option><option value="frasco">frasco</option></select>
-            <button class="btn btn-outline" style="padding: 14px 0;" onclick="workerAddItem('vac')">+</button>
           </div>
         </div>
       </div>
-
       <div class="card" style="border-top: 3px solid var(--purple);">
         <div class="card-header" style="color: var(--purple); display:flex; justify-content:space-between;">
           <span>💰 Vendas de Frangos</span>
-          <label style="margin:0; text-transform:none; font-size:12px; color:var(--muted); display:flex; align-items:center; gap:5px;">
-            <input type="checkbox" id="wAtivarVendas" style="width:16px; height:16px;" onchange="workerToggleVendas()"> Ativar
-          </label>
+          <label style="margin:0; text-transform:none; font-size:12px; color:var(--muted); display:flex; align-items:center; gap:5px;"><input type="checkbox" id="wAtivarVendas" style="width:16px; height:16px;" onchange="workerToggleVendas()"> Ativar</label>
         </div>
         <div id="wVendasGroup" class="hidden">
           <div class="row">
-            <div class="form-group"><label>Cliente</label><input type="text" id="wVendaCliente" placeholder="Nome"></div>
-            <div class="form-group"><label>Qtd Aves</label><input type="number" id="wVendaQty" placeholder="0"></div>
+            <div class="form-group"><label>Cliente</label><input type="text" id="wVendaCliente" placeholder="NOME DO CLIENTE"></div>
+            <div class="form-group"><label>Qtd Aves</label><input type="number" id="wVendaQty" placeholder="QTD"></div>
           </div>
         </div>
       </div>
-
       <div class="card">
-        <div class="form-group"><label>Observações Gerais</label><input type="text" id="wObs" placeholder="Alguma nota?"></div>
+        <div class="form-group"><label>Observações Gerais</label><input type="text" id="wObs" placeholder="ALGUMA NOTA IMPORTANTE?"></div>
         <button class="btn btn-primary" onclick="workerPreview()">Pré-visualizar Relatório</button>
       </div>
     </div>
 
-    <!-- PREVIEW -->
     <div id="worker-view-preview" class="view">
       <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px;">
         <h2 style="margin:0; font-size: 20px;">Relatório Pronto</h2>
         <button class="btn btn-outline btn-sm" onclick="workerNav('form')">Editar</button>
       </div>
-      
-      <!-- CAMPO PARA O NÚMERO DE TELEFONE -->
       <div class="card" style="border-left: 4px solid var(--blue); background: var(--surface2);">
         <div class="form-group" style="margin-bottom: 0;">
           <label style="color: var(--blue);">Para quem deseja enviar? (Número de telefone)</label>
-          <input type="tel" id="wTargetPhone" placeholder="Ex: 258840000000" oninput="workerUpdateLinks()">
+          <input type="tel" id="wTargetPhone" placeholder="EX: 258840000000" oninput="workerUpdateLinks()">
         </div>
-        <div style="font-size: 11px; color: var(--muted); margin-top: 6px;">O telemóvel vai lembrar-se deste número para a próxima vez. Pode alterá-lo sempre que quiser.</div>
       </div>
-
       <div class="card" style="background: var(--surface2); font-family: monospace; white-space: pre-wrap; font-size: 14px; line-height: 1.6;" id="wReportText"></div>
-      
       <div style="display:flex; gap:8px; margin-bottom: 12px;">
-        <a id="wBtnWhatsApp" href="#" target="_blank" class="btn btn-success" style="flex:1;">📤 WhatsApp</a>
+        <button onclick="workerPrepareWhatsApp()" class="btn btn-success" style="flex:1;">📤 WhatsApp</button>
         <a id="wBtnSMS" href="#" class="btn btn-sms" style="flex:1;">📱 Enviar SMS</a>
       </div>
-      
-      <button class="btn btn-primary" onclick="workerExportJSON()">📥 Exportar Ficheiro (AVICONTROL)</button>
+      <div style="display:flex; gap:8px; margin-bottom: 12px;">
+        <button class="btn btn-primary" onclick="workerExportJSON()" style="flex:1;">📥 Exportar JSON</button>
+        <button class="btn btn-outline" onclick="workerExportAndShare()" style="flex:1;">📤 Exportar e Enviar</button>
+      </div>
       <button class="btn btn-outline" style="margin-top: 12px;" onclick="workerNav('dash')">Concluir e Voltar</button>
     </div>
 
-    <!-- HISTÓRICO -->
     <div id="worker-view-history" class="view">
       <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px;">
         <h2 style="margin:0; font-size: 20px;">Histórico</h2>
@@ -8229,11 +8180,15 @@ var workerHTML = `
       <div id="workerHistoryList"></div>
     </div>
 
-    <!-- DEFINIÇÕES -->
     <div id="worker-view-settings" class="view">
       <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px;">
         <h2 style="margin:0; font-size: 20px;">Definições</h2>
         <button class="btn btn-outline btn-sm" onclick="workerNav('dash')">Voltar</button>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--accent);">
+        <div class="card-header">Preços e Produtos</div>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">Para alterar os preços ou adicionar novos produtos, o Patrão deve aceder ao sistema no computador.</p>
+        <a href="https://dolaredson-lang.github.io/avicontrol/" target="_blank" class="btn btn-primary">🔗 Aceder ao Sistema (Admin)</a>
       </div>
       <div class="card">
         <div class="card-header">Backup de Segurança</div>
@@ -8241,7 +8196,15 @@ var workerHTML = `
         <button class="btn btn-primary" onclick="workerBackupData()">📥 Exportar Backup</button>
       </div>
     </div>
-
+  </div>
+</div>
+<div id="contactModal" class="worker-modal">
+  <div class="worker-modal-content">
+    <h3 style="margin-top:0; color:var(--text);">Enviar Relatório</h3>
+    <p style="color:var(--muted); font-size:13px; margin-bottom:20px;">Como deseja enviar para o Patrão?</p>
+    <button class="btn btn-primary" style="margin-bottom:10px;" onclick="workerUseSavedPhone()">📱 Usar Número Guardado (<span id="savedPhoneLabel"></span>)</button>
+    <button class="btn btn-outline" style="margin-bottom:10px;" onclick="workerPickContact()">👥 Escolher da Lista de Contactos</button>
+    <button class="btn btn-outline" onclick="workerCloseModal()">Cancelar</button>
   </div>
 </div>
 `;
@@ -8249,35 +8212,29 @@ document.body.insertAdjacentHTML('beforeend', workerHTML);
 
 var wState = { report: { meds: [], vacs: [], vendas: null } };
 var workerHistory = safeLoad('avi_worker_history');
+var savedContact = safeLoadObj('avi_worker_contact', { numero: '' });
 
 window.workerNav = function(view) {
     document.querySelectorAll('#worker-app .view').forEach(v => v.classList.remove('active'));
     document.getElementById('worker-view-' + view).classList.add('active');
     document.getElementById('worker-app').scrollTop = 0;
 };
-
 window.workerToggleMorte = function() {
     var isZero = document.getElementById('wMorteZero').checked;
     var group = document.getElementById('wMorteGroup');
     var qty = document.getElementById('wMorteQty');
-    if (isZero) { group.classList.add('hidden'); qty.value = '0'; } 
-    else { group.classList.remove('hidden'); qty.value = ''; }
+    if (isZero) { group.classList.add('hidden'); qty.value = '0'; } else { group.classList.remove('hidden'); qty.value = ''; }
 };
-
 window.workerToggleVendas = function() {
     var ativo = document.getElementById('wAtivarVendas').checked;
     var group = document.getElementById('wVendasGroup');
-    if (ativo) group.classList.remove('hidden');
-    else group.classList.add('hidden');
+    if (ativo) group.classList.remove('hidden'); else group.classList.add('hidden');
 };
-
 window.workerStartReport = function() {
     var today = new Date();
     var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
-    
     wState.report = { date: dateStr, meds: [], vacs: [], vendas: null };
     document.getElementById('workerFormTitle').textContent = 'Novo Registo';
-    
     document.getElementById('wDate').value = dateStr;
     document.getElementById('wMorteZero').checked = false;
     workerToggleMorte();
@@ -8291,248 +8248,112 @@ window.workerStartReport = function() {
     document.getElementById('wAtivarVendas').checked = false;
     workerToggleVendas();
     document.getElementById('wObs').value = '';
-    
     workerRenderLists();
     workerNav('form');
 };
-
-window.workerEditReport = function(index) {
-    var r = workerHistory[index];
-    if (!r) return;
-    wState.report = JSON.parse(JSON.stringify(r));
-    wState.editIndex = index;
-
-    document.getElementById('workerFormTitle').textContent = 'A Editar Registo';
-    document.getElementById('wDate').value = r.date;
-    document.getElementById('wLote').value = r.lote || '';
-    document.getElementById('wWorker').value = r.worker || '';
-    document.getElementById('wCapoeira').value = r.capoeira || '';
-    
-    if (r.morte == 0) document.getElementById('wMorteZero').checked = true;
-    else { document.getElementById('wMorteZero').checked = false; document.getElementById('wMorteQty').value = r.morte; }
-    workerToggleMorte();
-
-    document.getElementById('wRacaoSacos').value = r.racaoSacos || '';
-    document.getElementById('wSerrQty').value = r.serrSacos || '';
-    document.getElementById('wCarvQty').value = r.carvSacos || '';
-    document.getElementById('wObs').value = r.obs || '';
-
-    if (r.vendas) {
-        document.getElementById('wAtivarVendas').checked = true;
-        document.getElementById('wVendaCliente').value = r.vendas.cliente;
-        document.getElementById('wVendaQty').value = r.vendas.qtd;
-    } else {
-        document.getElementById('wAtivarVendas').checked = false;
-    }
-    workerToggleVendas();
-    workerRenderLists();
-    workerNav('form');
-};
-
 window.workerAddItem = function(tipo) {
     if (tipo === 'med') {
-        var p = document.getElementById('wMedProd').value.trim();
-        var q = document.getElementById('wMedQty').value.trim();
-        var u = document.getElementById('wMedUnit').value;
-        if (p && q) {
-            wState.report.meds.push({ prod: p, qty: q, unit: u });
-            document.getElementById('wMedProd').value = '';
-            document.getElementById('wMedQty').value = '';
-        }
+        var p = document.getElementById('wMedProd').value.trim(); var q = document.getElementById('wMedQty').value.trim(); var u = document.getElementById('wMedUnit').value;
+        if (p && q) { wState.report.meds.push({ prod: p, qty: q, unit: u }); document.getElementById('wMedProd').value = ''; document.getElementById('wMedQty').value = ''; }
     } else {
-        var p = document.getElementById('wVacProd').value.trim();
-        var q = document.getElementById('wVacQty').value.trim();
-        var u = document.getElementById('wVacUnit').value;
-        if (p && q) {
-            wState.report.vacs.push({ prod: p, qty: q, unit: u });
-            document.getElementById('wVacProd').value = '';
-            document.getElementById('wVacQty').value = '';
-        }
+        var p = document.getElementById('wVacProd').value.trim(); var q = document.getElementById('wVacQty').value.trim(); var u = document.getElementById('wVacUnit').value;
+        if (p && q) { wState.report.vacs.push({ prod: p, qty: q, unit: u }); document.getElementById('wVacProd').value = ''; document.getElementById('wVacQty').value = ''; }
     }
     workerRenderLists();
 };
-
 window.workerRemoveItem = function(tipo, idx) {
-    if (tipo === 'med') wState.report.meds.splice(idx, 1);
-    else wState.report.vacs.splice(idx, 1);
+    if (tipo === 'med') wState.report.meds.splice(idx, 1); else wState.report.vacs.splice(idx, 1);
     workerRenderLists();
 };
-
 window.workerRenderLists = function() {
-    document.getElementById('wMedsList').innerHTML = wState.report.meds.map((m, i) => `
-        <div class="list-item">
-            <div><strong style="display:block; font-size:14px;">${m.prod}</strong><span style="font-size:12px; color:var(--muted);">${m.qty} ${m.unit}</span></div>
-            <button class="btn btn-outline btn-sm" style="color: var(--red);" onclick="workerRemoveItem('med', ${i})">✕</button>
-        </div>
-    `).join('');
-    
-    document.getElementById('wVacsList').innerHTML = wState.report.vacs.map((v, i) => `
-        <div class="list-item">
-            <div><strong style="display:block; font-size:14px;">${v.prod}</strong><span style="font-size:12px; color:var(--muted);">${v.qty} ${v.unit}</span></div>
-            <button class="btn btn-outline btn-sm" style="color: var(--red);" onclick="workerRemoveItem('vac', ${i})">✕</button>
-        </div>
-    `).join('');
+    document.getElementById('wMedsList').innerHTML = wState.report.meds.map((m, i) => `<div class="list-item"><div><strong style="display:block; font-size:14px;">${m.prod}</strong><span style="font-size:12px; color:var(--muted);">${m.qty} ${m.unit}</span></div><button class="btn btn-outline btn-sm" style="color: var(--red);" onclick="workerRemoveItem('med', ${i})">✕</button></div>`).join('');
+    document.getElementById('wVacsList').innerHTML = wState.report.vacs.map((v, i) => `<div class="list-item"><div><strong style="display:block; font-size:14px;">${v.prod}</strong><span style="font-size:12px; color:var(--muted);">${v.qty} ${v.unit}</span></div><button class="btn btn-outline btn-sm" style="color: var(--red);" onclick="workerRemoveItem('vac', ${i})">✕</button></div>`).join('');
 };
-
-// Nova função para atualizar os links em tempo real quando o número é alterado
-window.workerUpdateLinks = function() {
-    var phoneInput = document.getElementById('wTargetPhone').value;
-    var phone = phoneInput.replace(/\D/g, ''); // Remove espaços e símbolos, deixa só números
-    var text = document.getElementById('wReportText').textContent;
-    var encodedText = encodeURIComponent(text);
-    
-    var waLink = phone ? "https://wa.me/" + phone + "?text=" + encodedText : "https://wa.me/?text=" + encodedText;
-    var smsLink = phone ? "sms:" + phone + "?body=" + encodedText : "sms:?body=" + encodedText;
-    
-    document.getElementById('wBtnWhatsApp').href = waLink;
-    document.getElementById('wBtnSMS').href = smsLink;
-    
-    // Guardar o número na memória do telemóvel
-    if (phone) {
-        safeSet('avi_worker_contact', JSON.stringify({ numero: phone }));
-    }
-};
-
 window.workerPreview = function() {
     var r = wState.report;
-    r.date = document.getElementById('wDate').value;
-    r.lote = document.getElementById('wLote').value;
-    r.worker = document.getElementById('wWorker').value;
-    r.capoeira = document.getElementById('wCapoeira').value;
+    r.date = document.getElementById('wDate').value; r.lote = document.getElementById('wLote').value; r.worker = document.getElementById('wWorker').value; r.capoeira = document.getElementById('wCapoeira').value;
     r.morte = document.getElementById('wMorteZero').checked ? 0 : document.getElementById('wMorteQty').value;
-    r.racaoSacos = document.getElementById('wRacaoSacos').value;
-    r.racaoPeso = document.getElementById('wRacaoPeso').value;
-    r.serrSacos = document.getElementById('wSerrQty').value;
-    r.carvSacos = document.getElementById('wCarvQty').value;
-    r.obs = document.getElementById('wObs').value;
-
-    if (document.getElementById('wAtivarVendas').checked) {
-        r.vendas = { cliente: document.getElementById('wVendaCliente').value, qtd: document.getElementById('wVendaQty').value };
-    } else { r.vendas = null; }
-
-    var t = "*RELATÓRIO DIÁRIO*\n";
-    t += "Data: " + r.date + "\n";
-    t += "Lote: " + (r.lote || "-") + "\n";
-    t += "Trabalhador: " + (r.worker || "-") + " (" + (r.capoeira || "-") + ")\n\n";
-    
-    if (r.morte > 0) t += "Mortalidade: " + r.morte + " frangos\n";
-    else if (r.morte == 0) t += "Mortalidade: Sem registos\n";
-    
-    var stock = [];
-    if (r.racaoSacos > 0) stock.push("- Ração: " + r.racaoSacos + " sacos (" + r.racaoPeso + "kg)");
-    if (r.serrSacos > 0) stock.push("- Serradura: " + r.serrSacos + " sacos");
-    if (r.carvSacos > 0) stock.push("- Carvão: " + r.carvSacos + " sacos");
-    r.meds.forEach(function(m) { stock.push("- " + m.prod + ": " + m.qty + " " + m.unit); });
-    r.vacs.forEach(function(v) { stock.push("- " + v.prod + ": " + v.qty + " " + v.unit); });
-    
+    r.racaoSacos = document.getElementById('wRacaoSacos').value; r.serrSacos = document.getElementById('wSerrQty').value; r.carvSacos = document.getElementById('wCarvQty').value; r.obs = document.getElementById('wObs').value;
+    if (document.getElementById('wAtivarVendas').checked) { r.vendas = { cliente: document.getElementById('wVendaCliente').value, qtd: document.getElementById('wVendaQty').value }; } else { r.vendas = null; }
+    var t = "*RELATÓRIO DIÁRIO*\nData: " + r.date + "\nLote: " + (r.lote || "-") + "\nTrabalhador: " + (r.worker || "-") + " (" + (r.capoeira || "-") + ")\n\n";
+    if (r.morte > 0) t += "Mortalidade: " + r.morte + " frangos\n"; else if (r.morte == 0) t += "Mortalidade: Sem registos\n";
+    var stock = []; if (r.racaoSacos > 0) stock.push("- Ração: " + r.racaoSacos + " sacos (50kg)"); if (r.serrSacos > 0) stock.push("- Serradura: " + r.serrSacos + " sacos"); if (r.carvSacos > 0) stock.push("- Carvão: " + r.carvSacos + " sacos");
+    r.meds.forEach(function(m) { stock.push("- " + m.prod + ": " + m.qty + " " + m.unit); }); r.vacs.forEach(function(v) { stock.push("- " + v.prod + ": " + v.qty + " " + v.unit); });
     if (stock.length > 0) t += "\n*ENTRADA DE STOCK:*\n" + stock.join('\n') + "\n";
-
-    if (r.vendas) {
-        t += "\n*VENDAS:*\n";
-        t += "- Cliente: " + (r.vendas.cliente || "Geral") + "\n";
-        t += "- Quantidade: " + r.vendas.qtd + " frangos\n";
-    }
+    if (r.vendas) t += "\n*VENDAS:*\n- Cliente: " + (r.vendas.cliente || "Geral") + "\n- Quantidade: " + r.vendas.qtd + " frangos\n";
     if (r.obs) t += "\nObs: " + r.obs;
-
     document.getElementById('wReportText').textContent = t;
-
-    // Carregar o último número usado (se existir)
-    var contactObj = safeLoadObj('avi_worker_contact', { numero: '' });
-    document.getElementById('wTargetPhone').value = contactObj.numero || '';
-    
-    // Atualizar os links com o número
+    document.getElementById('wTargetPhone').value = savedContact.numero || '';
     workerUpdateLinks();
-
     workerNav('preview');
 };
-
+window.workerUpdateLinks = function() {
+    var phoneInput = document.getElementById('wTargetPhone').value; var phone = phoneInput.replace(/\D/g, ''); var text = document.getElementById('wReportText').textContent; var encodedText = encodeURIComponent(text);
+    var smsLink = phone ? "sms:" + phone + "?body=" + encodedText : "sms:?body=" + encodedText; document.getElementById('wBtnSMS').href = smsLink;
+    if (phone) { safeSet('avi_worker_contact', JSON.stringify({ numero: phone })); savedContact.numero = phone; }
+};
+window.workerPrepareWhatsApp = function() {
+    var phone = document.getElementById('wTargetPhone').value.replace(/\D/g, '');
+    if (!phone) { document.getElementById('savedPhoneLabel').textContent = savedContact.numero ? savedContact.numero : 'Nenhum'; document.getElementById('contactModal').classList.add('active'); return; }
+    var text = document.getElementById('wReportText').textContent; window.open("https://wa.me/" + phone + "?text=" + encodeURIComponent(text), '_blank');
+};
+window.workerCloseModal = function() { document.getElementById('contactModal').classList.remove('active'); };
+window.workerUseSavedPhone = function() {
+    if (!savedContact.numero) { alert('Não há número guardado. Por favor digite no campo.'); workerCloseModal(); return; }
+    document.getElementById('wTargetPhone').value = savedContact.numero; workerUpdateLinks(); workerCloseModal(); workerPrepareWhatsApp();
+};
+window.workerPickContact = function() {
+    if ('contacts' in navigator && 'select' in navigator.contacts) {
+        navigator.contacts.select(['tel'], { multiple: false }).then(function(contacts) {
+            if (contacts.length > 0 && contacts[0].tel && contacts[0].tel.length > 0) {
+                var num = contacts[0].tel[0].replace(/\D/g, ''); document.getElementById('wTargetPhone').value = num; workerUpdateLinks(); workerCloseModal(); workerPrepareWhatsApp();
+            }
+        }).catch(function(err) { alert("O acesso aos contactos foi negado ou falhou. Por favor digite o número."); });
+    } else { alert("O seu telemóvel não suporta a seleção direta de contactos. Por favor digite o número."); }
+};
 window.workerSaveReport = function() {
-    var r = wState.report;
-    if (!r.worker) { alert("Por favor, preencha o nome do trabalhador."); workerNav('form'); return false; }
-    
-    if (wState.editIndex !== undefined) {
-        workerHistory[wState.editIndex] = r;
-        wState.editIndex = undefined;
-    } else {
-        workerHistory.push(r);
-    }
-    safeSet('avi_worker_history', JSON.stringify(workerHistory));
-    return true;
+    var r = wState.report; if (!r.worker) { alert("Por favor, preencha o nome do trabalhador."); workerNav('form'); return false; }
+    if (wState.editIndex !== undefined) { workerHistory[wState.editIndex] = r; wState.editIndex = undefined; } else { workerHistory.push(r); }
+    safeSet('avi_worker_history', JSON.stringify(workerHistory)); return true;
 };
-
 window.workerExportJSON = function() {
-    if (!workerSaveReport()) return;
-    
-    var r = wState.report;
-    var exportData = {
-        origem: "AppCapoeira", data: r.date, trabalhador: r.worker, capoeira: r.capoeira, lote: r.lote,
-        mortalidade: { quantidade: parseInt(r.morte) || 0 },
-        racao: { consumo_kg: (parseFloat(r.racaoSacos) || 0) * (parseFloat(r.racaoPeso) || 50) },
-        serradura: { qty: parseFloat(r.serrSacos) || 0, unidade: 'sacos' },
-        carvao: { qty: parseFloat(r.carvSacos) || 0, unidade: 'sacos' },
-        medicamentos: r.meds, vacinas: r.vacs,
-        vendas: r.vendas ? { cliente: r.vendas.cliente, qtd: parseInt(r.vendas.qtd) } : null,
-        observacoes_gerais: r.obs
-    };
-    
-    var blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a'); 
-    a.href = url; 
-    a.download = 'avicontrol_' + r.date + '.json'; 
-    a.click(); 
-    URL.revokeObjectURL(url);
-    
-    alert('Ficheiro JSON guardado! Pode agora enviar a mensagem por WhatsApp ou SMS.');
+    if (!workerSaveReport()) return; var r = wState.report;
+    var exportData = { origem: "AppCapoeira", data: r.date, trabalhador: r.worker, capoeira: r.capoeira, lote: r.lote, mortalidade: { quantidade: parseInt(r.morte) || 0 }, racao: { consumo_kg: (parseFloat(r.racaoSacos) || 0) * 50 }, serradura: { qty: parseFloat(r.serrSacos) || 0, unidade: 'sacos' }, carvao: { qty: parseFloat(r.carvSacos) || 0, unidade: 'sacos' }, medicamentos: r.meds, vacinas: r.vacs, vendas: r.vendas ? { cliente: r.vendas.cliente, qtd: parseInt(r.vendas.qtd) } : null, observacoes_gerais: r.obs };
+    var blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" }); var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href = url; a.download = 'avicontrol_' + r.date + '.json'; a.click(); URL.revokeObjectURL(url); return exportData;
 };
-
+window.workerExportAndShare = function() {
+    var data = workerExportJSON(); if (!data) return;
+    var phone = document.getElementById('wTargetPhone').value.replace(/\D/g, ''); if (!phone) { alert('Por favor, preencha o número no topo para enviar.'); return; }
+    var text = "Ficheiro JSON gerado com sucesso. Por favor, anexe o ficheiro descarregado na conversa do WhatsApp.";
+    window.open("https://wa.me/" + phone + "?text=" + encodeURIComponent(text), '_blank'); workerNav('dash');
+};
 window.workerShowHistory = function() {
     var el = document.getElementById('workerHistoryList');
-    if (workerHistory.length === 0) {
-        el.innerHTML = '<div class="card" style="text-align:center; color:var(--muted);">Nenhum registo guardado neste telemóvel.</div>';
-    } else {
-        el.innerHTML = workerHistory.map((h, i) => `
-            <div class="card" style="margin-bottom: 8px; padding: 16px;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <div style="font-weight:bold; font-size:15px; color:var(--accent);">${h.date} - ${h.lote || 'S/ Lote'}</div>
-                        <div style="font-size:12px; color:var(--muted); margin-top:4px;">${h.worker || 'S/ Nome'} | Mortes: ${h.morte}</div>
-                    </div>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn btn-outline btn-sm" onclick="workerEditReport(${i})">✏️</button>
-                        <button class="btn btn-danger btn-sm" onclick="workerDeleteHistory(${i})">🗑️</button>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
+    if (workerHistory.length === 0) { el.innerHTML = '<div class="card" style="text-align:center; color:var(--muted);">Nenhum registo guardado neste telemóvel.</div>'; }
+    else { el.innerHTML = workerHistory.map((h, i) => `<div class="card" style="margin-bottom: 8px; padding: 16px;"><div style="display:flex; justify-content:space-between; align-items:center;"><div><div style="font-weight:bold; font-size:15px; color:var(--accent);">${h.date} - ${h.lote || 'S/ Lote'}</div><div style="font-size:12px; color:var(--muted); margin-top:4px;">${h.worker || 'S/ Nome'} | Mortes: ${h.morte}</div></div><div style="display:flex; gap:5px;"><button class="btn btn-outline btn-sm" onclick="workerEditReport(${i})">✏️</button><button class="btn btn-danger btn-sm" onclick="workerDeleteHistory(${i})">🗑️</button></div></div></div>`).join(''); }
     workerNav('history');
 };
-
-window.workerDeleteHistory = function(index) {
-    if (confirm('Apagar este registo do histórico?')) {
-        workerHistory.splice(index, 1);
-        safeSet('avi_worker_history', JSON.stringify(workerHistory));
-        workerShowHistory();
-    }
+window.workerEditReport = function(index) {
+    var r = workerHistory[index]; if (!r) return; wState.report = JSON.parse(JSON.stringify(r)); wState.editIndex = index;
+    document.getElementById('workerFormTitle').textContent = 'A Editar Registo'; document.getElementById('wDate').value = r.date; document.getElementById('wLote').value = r.lote || ''; document.getElementById('wWorker').value = r.worker || ''; document.getElementById('wCapoeira').value = r.capoeira || '';
+    if (r.morte == 0) document.getElementById('wMorteZero').checked = true; else { document.getElementById('wMorteZero').checked = false; document.getElementById('wMorteQty').value = r.morte; } workerToggleMorte();
+    document.getElementById('wRacaoSacos').value = r.racaoSacos || ''; document.getElementById('wSerrQty').value = r.serrSacos || ''; document.getElementById('wCarvQty').value = r.carvSacos || ''; document.getElementById('wObs').value = r.obs || '';
+    if (r.vendas) { document.getElementById('wAtivarVendas').checked = true; document.getElementById('wVendaCliente').value = r.vendas.cliente; document.getElementById('wVendaQty').value = r.vendas.qtd; } else { document.getElementById('wAtivarVendas').checked = false; } workerToggleVendas();
+    workerRenderLists(); workerNav('form');
 };
-
+window.workerDeleteHistory = function(index) {
+    if (confirm('Apagar este registo do histórico?')) { workerHistory.splice(index, 1); safeSet('avi_worker_history', JSON.stringify(workerHistory)); workerShowHistory(); }
+};
 window.workerBackupData = function() {
-    var blob = new Blob([JSON.stringify(workerHistory, null, 2)], { type: "application/json" });
-    var url = URL.createObjectURL(blob);
+    var blob = new Blob([JSON.stringify(workerHistory, null, 2)], { type: "application/json" }); var url = URL.createObjectURL(blob);
     var a = document.createElement('a'); a.href = url; a.download = 'backup_historico.json'; a.click(); URL.revokeObjectURL(url);
 };
-
-var oldAplicarPermissoesV26 = window.aplicarPermissoes;
+var oldAplicarPermissoesV28 = window.aplicarPermissoes;
 window.aplicarPermissoes = function(role, nome) {
-    if (oldAplicarPermissoesV26) oldAplicarPermissoesV26(role, nome);
-    if (role === 'campo') {
-        document.body.classList.add('modo-campo');
-        document.getElementById('worker-app').style.display = 'block';
-        document.getElementById('workerWelcomeName').textContent = 'Olá, ' + nome.split(' ')[0];
-    }
+    if (oldAplicarPermissoesV28) oldAplicarPermissoesV28(role, nome);
+    if (role === 'campo') { document.body.classList.add('modo-campo'); document.getElementById('worker-app').style.display = 'block'; document.getElementById('workerWelcomeName').textContent = 'Olá, ' + nome.split(' ')[0]; }
 };
-
 setTimeout(function() {
     var sessaoGuardada = localStorage.getItem('avi_sessao_atual');
     if(sessaoGuardada) {
@@ -8545,7 +8366,7 @@ setTimeout(function() {
     }
 }, 100);
 
-console.log('%c[AVICONTROL] App Trabalhador v26 (Número Editável) ativada!', 'color:#22c55e; font-weight:bold;');
+console.log('%c[AVICONTROL] App Trabalhador v28 (Final) ativada!', 'color:#22c55e; font-weight:bold;');
 // ════════════════════════════════════════════════════════════════════════════
 // AVICONTROL — v27: SINCRONIZAÇÃO SUPABASE (NUVEM)
 // ════════════════════════════════════════════════════════════════════════════
